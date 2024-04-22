@@ -1,0 +1,25 @@
+services:
+  vaultwarden:
+    depends_on:
+      - vw-db
+    image: vaultwarden/server:latest
+    container_name: vaultwarden
+    restart: always
+    volumes:
+      - ./vw-data:/data
+    env_file: .env
+
+  vw-db:
+    image: mariadb:latest
+    container_name: vw-db
+    restart: always
+    env_file:
+      - .db.env
+    volumes:
+      - ./db-data:/var/lib/mysql
+      - /etc/localtime:/etc/localtime:ro
+
+networks:
+  default:
+    external: true
+    name: krokosik-web-services
