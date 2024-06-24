@@ -1,0 +1,32 @@
+services:
+  app:
+    container_name: shlink
+    image: shlinkio/shlink:stable
+    ports:
+      - "8080:8080"
+    environment:
+      - DEFAULT_DOMAIN=s.nvlv-studio.com
+      - IS_HTTPS_ENABLED=true
+      - DB_DRIVER=maria
+      - DB_HOST=shlink_db
+      - DEFAULT_QR_CODE_ERROR_CORRECTION=H
+    env_file:
+      - .env
+    depends_on:
+      - db
+  
+  db:
+    container_name: shlink_db
+    image: 'mariadb:latest'
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    env_file:
+      - .env
+    volumes:
+      - ./mysql:/var/lib/mysql
+
+networks:
+  default:
+    external: true
+    name: krokosik-web-services
