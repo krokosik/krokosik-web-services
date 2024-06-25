@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   app:
     container_name: npm
@@ -11,8 +10,9 @@ services:
       - '81:81' # Admin Web Port
       # Add any other Stream port you want to expose
       # - '21:21' # FTP
-      - 8443:8443/udp
-      - 8443:8443/tcp
+      # - 8443:8443/udp Mattermost
+      # - 8443:8443/tcp
+      # - 1587:1587 # SMTP proxy
 
     environment:
       # Mysql/Maria connection parameters:

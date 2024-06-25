@@ -2,8 +2,6 @@ services:
   app:
     container_name: shlink
     image: shlinkio/shlink:stable
-    ports:
-      - "8080:8080"
     environment:
       - DEFAULT_DOMAIN=s.nvlv-studio.com
       - IS_HTTPS_ENABLED=true
@@ -19,8 +17,6 @@ services:
     container_name: shlink_db
     image: 'mariadb:latest'
     restart: unless-stopped
-    ports:
-      - "3306:3306"
     env_file:
       - .env
     volumes:

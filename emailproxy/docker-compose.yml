@@ -1,0 +1,20 @@
+services:
+  emailproxy:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: emailproxy
+    volumes:
+      - ./data:/config
+    ports:
+      - 1587:1587
+    environment:
+      LOGFILE: true
+      DEBUG: true
+      CACHE_STORE: /config/credstore.config
+      LOCAL_SERVER_AUTH: false #Optional
+
+networks:
+  default:
+    external: true
+    name: krokosik-web-services
