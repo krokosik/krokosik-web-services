@@ -6,8 +6,6 @@ services:
     container_name: emailproxy
     volumes:
       - ./data:/config
-    ports:
-      - 1587:1587
     environment:
       LOGFILE: true
       DEBUG: true

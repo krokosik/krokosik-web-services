@@ -1,5 +1,5 @@
 services:
-  app:
+  npm:
     container_name: npm
     image: 'jc21/nginx-proxy-manager:latest'
     restart: unless-stopped
@@ -7,12 +7,11 @@ services:
       # These ports are in format <host-port>:<container-port>
       - '80:80' # Public HTTP Port
       - '443:443' # Public HTTPS Port
-      - '81:81' # Admin Web Port
       # Add any other Stream port you want to expose
       # - '21:21' # FTP
       # - 8443:8443/udp Mattermost
       # - 8443:8443/tcp
-      # - 1587:1587 # SMTP proxy
+      - 1587:1587/tcp # SMTP proxy
 
     environment:
       # Mysql/Maria connection parameters:
