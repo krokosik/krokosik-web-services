@@ -6,7 +6,7 @@ services:
     container_name: vaultwarden
     restart: always
     volumes:
-      - ./vw-data:/data
+      - ./data:/data
     env_file: .env
 
   vw-db:
@@ -16,8 +16,11 @@ services:
     env_file:
       - .db.env
     volumes:
-      - ./db-data:/var/lib/mysql
+      - mysql:/var/lib/mysql
       - /etc/localtime:/etc/localtime:ro
+
+volumes:
+  mysql:
 
 networks:
   default:

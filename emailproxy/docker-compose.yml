@@ -7,10 +7,10 @@ services:
     volumes:
       - ./data:/config
     environment:
-      LOGFILE: true
-      DEBUG: true
+      LOGFILE: 'true'
+      DEBUG: 'true'
       CACHE_STORE: /config/credstore.config
-      LOCAL_SERVER_AUTH: false #Optional
+      LOCAL_SERVER_AUTH: 'false' #Optional
 
 networks:
   default:

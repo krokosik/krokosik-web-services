@@ -14,13 +14,16 @@ services:
       - db
   
   db:
-    container_name: shlink_db
+    container_name: shlink-db
     image: 'mariadb:latest'
     restart: unless-stopped
     env_file:
       - .env
     volumes:
-      - ./mysql:/var/lib/mysql
+      - mysql:/var/lib/mysql
+
+volumes:
+  mysql:
 
 networks:
   default:
