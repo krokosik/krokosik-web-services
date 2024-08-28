@@ -1,0 +1,26 @@
+services:
+  headscale:
+    image: headscale/headscale:v0.23.0-beta2
+    container_name: headscale
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Berlin
+    volumes:
+      - ./conf:/etc/headscale
+      - data:/var/lib/headscale
+    entrypoint: headscale serve
+
+  headscale-admin:
+    image: goodieshq/headscale-admin
+    container_name: headscale-admin
+    restart: unless-stopped
+    depends_on:
+      - headscale
+
+networks:
+  default:
+    external: true
+    name: krokosik-web-services
+
+volumes:
+  data:
