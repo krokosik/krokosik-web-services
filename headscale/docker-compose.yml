@@ -1,6 +1,6 @@
 services:
   headscale:
-    image: headscale/headscale:v0.23.0-beta2
+    image: headscale/headscale:v0.23.0
     container_name: headscale
     restart: unless-stopped
     environment:
@@ -10,12 +10,30 @@ services:
       - data:/var/lib/headscale
     entrypoint: headscale serve
 
-  headscale-admin:
-    image: goodieshq/headscale-admin
-    container_name: headscale-admin
+  headplane:
+    container_name: headplane
+    image: ghcr.io/tale/headplane:0.3.0
     restart: unless-stopped
     depends_on:
       - headscale
+    volumes:
+      - data:/var/lib/headscale
+      - ./conf:/etc/headscale
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      # This is always required for Headplane to work
+      COOKIE_SECRET: 'tzoOfTzY238ZBW+xg4UZanUgcO/+uw6qMwZ0m1gHvTg='
+
+      HEADSCALE_INTEGRATION: docker
+      HEADSCALE_CONTAINER: headscale
+      DISABLE_API_KEY_LOGIN: true
+      HOST: 0.0.0.0
+      PORT: 80
+
+      # This NEEDS to be set with OIDC, regardless of what's in the config
+      # This needs to be a very long-lived (999 day) API key used to create
+      # shorter ones for OIDC and allow the OIDC functionality to work
+      ROOT_API_KEY: '5cpGo9NW5A.CXGjMUMDQcJsUG_LPNpEYsQqy1J-_zOA6uT5mNYex0I'
 
 networks:
   default:
