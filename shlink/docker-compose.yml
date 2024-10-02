@@ -2,6 +2,7 @@ services:
   app:
     container_name: shlink
     image: shlinkio/shlink:stable
+    restart: unless-stopped
     environment:
       - DEFAULT_DOMAIN=s.nvlv-studio.com
       - IS_HTTPS_ENABLED=true
