@@ -68,21 +68,21 @@ services:
     restart: unless-stopped
   
   #Readarr - Used to download books
-  readarr:
-    image: lscr.io/linuxserver/readarr:0.4.19-nightly
-    container_name: readarr
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-    volumes:
-      - ${BASE_PATH}/readarr/config:/config
-      - ${MEDIA_SHARE}:/data
-    ports:
-      - 8787:8787
-    networks:
-      - starr
-    restart: unless-stopped
+  # readarr:
+  #   image: lscr.io/linuxserver/readarr:0.4.19-nightly
+  #   container_name: readarr
+  #   environment:
+  #     - PUID=${PUID}
+  #     - PGID=${PGID}
+  #     - TZ=${TZ}
+  #   volumes:
+  #     - ${BASE_PATH}/readarr/config:/config
+  #     - ${MEDIA_SHARE}:/data
+  #   ports:
+  #     - 8787:8787
+  #   networks:
+  #     - starr
+  #   restart: unless-stopped
     
   #Prowlarr - manages your Sonarr, Radarr and download client
   prowlarr:
@@ -98,17 +98,17 @@ services:
     restart: unless-stopped
     
   #Autobrr - used to grab torrents using the trackers IRC channel - Increases seeding due to grabbing content before RSS feed
-  autobrr:
-    container_name: autobrr
-    image: ghcr.io/autobrr/autobrr:latest
-    restart: unless-stopped
-    network_mode: "service:gluetun"
-    environment:
-      - TZ=${TZ}
-      - PUID=${PUID}
-      - PGID=${PGID}
-    volumes:
-      - ${BASE_PATH}/autobrr/config:/config
+  # autobrr:
+  #   container_name: autobrr
+  #   image: ghcr.io/autobrr/autobrr:latest
+  #   restart: unless-stopped
+  #   network_mode: "service:gluetun"
+  #   environment:
+  #     - TZ=${TZ}
+  #     - PUID=${PUID}
+  #     - PGID=${PGID}
+  #   volumes:
+  #     - ${BASE_PATH}/autobrr/config:/config
 
   #jellyseer - allows users to request media on their own
   jellyseerr:
@@ -382,63 +382,63 @@ services:
     networks:
       - starr
 
-  jellystat-db:
-    image: postgres:15.2
-    container_name: jellystat-db
-    environment:
-      POSTGRES_DB: 'jfstat'
-      POSTGRES_USER: ${JELLYSTATDB_USER:-postgres}
-      POSTGRES_PASSWORD: ${JELLYSTATDB_PASS:-password}
-    volumes:
-      - ${BASE_PATH}/jellystat/postgres-data:/var/lib/postgresql/data # Mounting the volume
-    restart: unless-stopped
-    networks:
-      - jellystat
+  # jellystat-db:
+  #   image: postgres:15.2
+  #   container_name: jellystat-db
+  #   environment:
+  #     POSTGRES_DB: 'jfstat'
+  #     POSTGRES_USER: ${JELLYSTATDB_USER:-postgres}
+  #     POSTGRES_PASSWORD: ${JELLYSTATDB_PASS:-password}
+  #   volumes:
+  #     - ${BASE_PATH}/jellystat/postgres-data:/var/lib/postgresql/data # Mounting the volume
+  #   restart: unless-stopped
+  #   networks:
+  #     - jellystat
 
-  jellystat:
-    image: cyfershepard/jellystat:latest
-    container_name: jellystat
-    environment:
-      POSTGRES_USER: ${JELLYSTATDB_USER:-postgres}
-      POSTGRES_PASSWORD: ${JELLYSTATDB_PASS:-password}
-      POSTGRES_IP: jellystat-db
-      POSTGRES_PORT: 5432
-      JWT_SECRET: ${JWT_SECRET:-'my-secret-jwt-key'}
-    ports:
-      - 3000:3000 #Server Port
-    volumes:
-      - ${BASE_PATH}/jellystat/postgres-backup:/app/backend/backup-data # Mounting the volume
-    depends_on:
-      - jellystat-db
-    restart: unless-stopped
-    networks:
-      - jellystat
+  # jellystat:
+  #   image: cyfershepard/jellystat:latest
+  #   container_name: jellystat
+  #   environment:
+  #     POSTGRES_USER: ${JELLYSTATDB_USER:-postgres}
+  #     POSTGRES_PASSWORD: ${JELLYSTATDB_PASS:-password}
+  #     POSTGRES_IP: jellystat-db
+  #     POSTGRES_PORT: 5432
+  #     JWT_SECRET: ${JWT_SECRET:-'my-secret-jwt-key'}
+  #   ports:
+  #     - 3000:3000 #Server Port
+  #   volumes:
+  #     - ${BASE_PATH}/jellystat/postgres-backup:/app/backend/backup-data # Mounting the volume
+  #   depends_on:
+  #     - jellystat-db
+  #   restart: unless-stopped
+  #   networks:
+  #     - jellystat
   
-  janitorr:
-    container_name: janitorr
-    image: ghcr.io/schaka/janitorr:stable
-    user: ${PUID}:${PGID} # Replace with your user who should own your application.yml file
-    volumes:
-      - ${BASE_PATH}/janitorr/application.yml:/workspace/application.yml
-      - ${BASE_PATH}/janitorr/logs:/logs
-      - ${MEDIA_SHARE}:/data
-    healthcheck:
-      test: "wget -T5 -qO- http://localhost:8081/health | grep UP || exit 1"
-      start_period: 30s
-      interval: 5s
-      retries: 3
-    networks:
-      - starr
+  # janitorr:
+  #   container_name: janitorr
+  #   image: ghcr.io/schaka/janitorr:stable
+  #   user: ${PUID}:${PGID} # Replace with your user who should own your application.yml file
+  #   volumes:
+  #     - ${BASE_PATH}/janitorr/application.yml:/workspace/application.yml
+  #     - ${BASE_PATH}/janitorr/logs:/logs
+  #     - ${MEDIA_SHARE}:/data
+  #   healthcheck:
+  #     test: "wget -T5 -qO- http://localhost:8081/health | grep UP || exit 1"
+  #     start_period: 30s
+  #     interval: 5s
+  #     retries: 3
+  #   networks:
+  #     - starr
 
-  profilarr:
-    image: santiagosayshey/profilarr:latest
-    container_name: profilarr
-    ports:
-      - 6868:6868
-    volumes:
-      - ${BASE_PATH}/profilarr:/config
-    environment:
-      - TZ=${TZ} # Set your timezone
-    restart: unless-stopped
-    networks:
-      - starr
+  # profilarr:
+  #   image: santiagosayshey/profilarr:latest
+  #   container_name: profilarr
+  #   ports:
+  #     - 6868:6868
+  #   volumes:
+  #     - ${BASE_PATH}/profilarr:/config
+  #   environment:
+  #     - TZ=${TZ} # Set your timezone
+  #   restart: unless-stopped
+  #   networks:
+  #     - starr
