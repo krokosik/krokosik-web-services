@@ -22,8 +22,6 @@ services:
       - /etc/localtime:/etc/localtime:ro
     env_file:
       - .env
-    ports:
-      - '2283:2283' # HTTP port
     expose:
       - '2283'
     depends_on:
@@ -32,12 +30,15 @@ services:
     restart: always
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.immich.rule=Host(`immich.chimp-qilin.ts.net`)"
+      - "traefik.http.routers.immich.rule=Host(`immich.ts.krokosik.com`)"
       - "traefik.http.routers.immich.entrypoints=websecure"
-      - "traefik.http.routers.immich.tls.certresolver=myresolver"
+      - "traefik.http.routers.immich.tls.certresolver=cfResolver"
       - "traefik.http.services.immich.loadbalancer.server.port=2283"
     healthcheck:
       disable: false
+    networks:
+      - krokosik-web-services
+      - default
 
   immich-machine-learning:
     container_name: immich_machine_learning
@@ -79,3 +80,8 @@ services:
 
 volumes:
   model-cache:
+
+networks:
+  krokosik-web-services:
+    external: true
+  default:
