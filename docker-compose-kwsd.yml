@@ -38,6 +38,12 @@ secrets:
     file: $DOCKERDIR/secrets/crowdsec_bouncer_traefik_key
   immich_db_password:
     file: $DOCKERDIR/secrets/immich_db_password
+  fireflyiii_db_password:
+    file: $DOCKERDIR/secrets/fireflyiii_db_password
+  fireflyiii_app_key:
+    file: $DOCKERDIR/secrets/fireflyiii_app_key
+  fireflyiii_cron_token:
+    file: $DOCKERDIR/secrets/fireflyiii_cron_token
 
 include:
   ########################### SERVICES
@@ -52,10 +58,12 @@ include:
 
   - compose/$HOSTNAME/redis.yml
   - compose/$HOSTNAME/immich.yml
+  - compose/$HOSTNAME/fireflyiii.yml
 
   ########################### POSTGRESQL RELATED
   - compose/$HOSTNAME/postgresql.yml
   - compose/$HOSTNAME/authentik.yml
+  # - compose/$HOSTNAME/mariadb.yml
 
   ########################### MEDIA SERVICES
   - compose/$HOSTNAME/jellyfin.yml

@@ -1,0 +1,93 @@
+services:
+  fireflyiii:
+    image: fireflyiii/core:latest
+    container_name: fireflyiii
+    profiles: ["apps", "all"]
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - $SHARE_DIR/fireflyiii:/var/www/html/storage/upload
+    networks:
+      - default
+      - traefik_proxy
+    depends_on:
+      - postgresql
+      - redis
+    secrets:
+      - fireflyiii_db_password
+      - fireflyiii_app_key
+      - fireflyiii_cron_token
+    environment:
+      DB_CONNECTION: pgsql
+      DB_HOST: postgresql
+      DB_PORT: 5432
+      DB_DATABASE: firefly
+      DB_USERNAME: firefly_db_user
+      DB_PASSWORD_FILE: /run/secrets/fireflyiii_db_password
+      APP_KEY_FILE: /run/secrets/fireflyiii_app_key
+      APP_ENV: production
+      APP_DEBUG: 'false'
+      SITE_OWNER: wiktor.krokosz+firefly@protonmail.com
+      DEFAULT_LANGUAGE: en_US
+      DEFAULT_LOCALE: pl_PL
+      TRUSTED_PROXIES: '**'
+      LOG_CHANNEL: stack
+      APP_LOG_LEVEL: notice
+      AUDIT_LOG_LEVEL: emergency
+      TZ: $TZ
+
+      CACHE_DRIVER: redis
+      SESSION_DRIVER: redis
+      REDIS_SCHEME: tcp
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      COOKIE_DOMAIN: $DOMAIN_NAME
+      COOKIE_PATH: /
+      COOKIE_SECURE: 'true'
+      COOKIE_SAMESITE: lax
+      ENABLE_EXCHANGE_RATES: 'true'
+      ENABLE_EXTERNAL_RATES: 'true'
+
+      AUTHENTICATION_GUARD: remote_user_guard
+      AUTHENTICATION_GUARD_HEADER: HTTP_X_AUTHENTIK_EMAIL
+      AUTHENTICATION_GUARD_EMAIL: HTTP_X_AUTHENTIK_EMAIL
+
+      FIREFLY_III_LAYOUT: v1
+      APP_URL: https://firefly.$DOMAIN_NAME
+      QUERY_PARSER_IMPLEMENTATION: new
+      STATIC_CRON_TOKEN_FILE: /run/secrets/fireflyiii_cron_token
+    labels:
+      - "traefik.enable=true"
+      # HTTP Routers
+      - "traefik.http.routers.firefly-rtr.entrypoints=websecure"
+      - "traefik.http.routers.firefly-rtr.rule=Host(`firefly.$DOMAIN_NAME`)"
+      # Middlewares
+      - "traefik.http.routers.firefly-rtr.middlewares=chain-authentik@file"
+      # HTTP Services
+      - "traefik.http.routers.firefly-rtr.service=firefly-svc"
+      - "traefik.http.services.firefly-svc.loadbalancer.server.port=8080"
+
+  fireflyiii-cron:
+    #
+    # To make this work, set STATIC_CRON_TOKEN in your .env file or as an environment variable
+    # The STATIC_CRON_TOKEN must be *exactly* 32 characters long
+    #
+    image: alpine
+    profiles: ["apps", "all"]
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    container_name: fireflyiii-cron
+    command: sh -c "
+      apk add tzdata && \
+      (ln -s /usr/share/zoneinfo/$$TZ /etc/localtime || true) && \
+      echo \"0 3 * * * wget -qO- http://fireflyiii:8080/api/v1/cron/$(cat /run/secrets/fireflyiii_cron_token);echo\"
+      | crontab - && \
+      crond -f -L /dev/stdout"
+    networks:
+      - default
+    depends_on:
+      - fireflyiii
+    secrets:
+      - fireflyiii_cron_token
