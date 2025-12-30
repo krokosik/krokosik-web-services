@@ -68,6 +68,46 @@ services:
       - "traefik.http.routers.firefly-rtr.service=firefly-svc"
       - "traefik.http.services.firefly-svc.loadbalancer.server.port=8080"
 
+  fireflyiii-importer:
+    image: fireflyiii/data-importer:latest
+    container_name: fireflyiii-importer
+    profiles: ["apps", "all"]
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - default
+      - traefik_proxy
+    depends_on:
+      - fireflyiii
+    environment:
+      FIREFLY_III_URL: http://fireflyiii:8080
+      VANITY_URL: https://firefly.$DOMAIN_NAME
+      FIREFLY_III_ACCESS_TOKEN_FILE: /run/secrets/fireflyiii_pat
+      USE_CACHE: 'true'
+      APP_ENV: production
+      APP_DEBUG: 'false'
+      LOG_CHANNEL: stack
+      TZ: $TZ
+      TRUSTED_PROXIES: '**'
+      CACHE_DRIVER: redis
+      SESSION_DRIVER: redis
+      REDIS_SCHEME: tcp
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    secrets:
+      - fireflyiii_pat
+    labels:
+      - "traefik.enable=true"
+      # HTTP Routers
+      - "traefik.http.routers.fimport-rtr.entrypoints=websecure"
+      - "traefik.http.routers.fimport-rtr.rule=Host(`fimport.$DOMAIN_NAME`)"
+      # Middlewares
+      - "traefik.http.routers.fimport-rtr.middlewares=chain-authentik@file"
+      # HTTP Services
+      - "traefik.http.routers.fimport-rtr.service=fimport-svc"
+      - "traefik.http.services.fimport-svc.loadbalancer.server.port=8080"
+
   fireflyiii-cron:
     #
     # To make this work, set STATIC_CRON_TOKEN in your .env file or as an environment variable
