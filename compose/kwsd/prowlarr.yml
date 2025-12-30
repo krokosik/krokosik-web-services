@@ -9,8 +9,9 @@ services:
     profiles: ["apps", "starr", "all"]
     networks:
       - default
-    ports:
-      - "$PROWLARR_PORT:9696"
+      - traefik_proxy
+    # ports:
+    #   - "$PROWLARR_PORT:9696"
     volumes:
       - $DOCKERDIR/appdata/prowlarr:/config
       - $DOWNLOADS_DIR:/data/downloads
@@ -19,4 +20,14 @@ services:
       TZ: $TZ
       PUID: $PUID
       PGID: $PGID
+    labels:
+      - "traefik.enable=true"
+      # HTTP Routers
+      - "traefik.http.routers.prowlarr-rtr.entrypoints=websecure"
+      - "traefik.http.routers.prowlarr-rtr.rule=Host(`prowlarr.$DOMAIN_NAME`)"
+      # Middlewares
+      - "traefik.http.routers.prowlarr-rtr.middlewares=chain-no-auth@file"
+      # HTTP Services
+      - "traefik.http.routers.prowlarr-rtr.service=prowlarr-svc"
+      - "traefik.http.services.prowlarr-svc.loadbalancer.server.port=9696"
     # DOCKER-LABELS-PLACEHOLDER

@@ -1,0 +1,37 @@
+services:
+  # seerr - Media Requests and Discovery for Jellyfin
+  seerr:
+    image: ghcr.io/seerr-team/seerr:develop
+    container_name: seerr
+    init: true
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    profiles: ["apps", "all"]
+    networks:
+      - default
+      - traefik_proxy
+    # ports:
+    #   - "$seerr_PORT:5055"
+    volumes:
+      - $DOCKERDIR/appdata/seerr:/app/config
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:5055/api/v1/status || exit 1
+      start_period: 20s
+      timeout: 3s
+      interval: 15s
+      retries: 3
+    environment:
+      TZ: $TZ
+      LOG_LEVEL: info
+    labels:
+      - "traefik.enable=true"
+      # HTTP Routers
+      - "traefik.http.routers.seerr-rtr.entrypoints=websecure"
+      - "traefik.http.routers.seerr-rtr.rule=Host(`seerr.$DOMAIN_NAME`)"
+      # Middlewares
+      - "traefik.http.routers.seerr-rtr.middlewares=chain-no-auth@file"
+      # HTTP Services
+      - "traefik.http.routers.seerr-rtr.service=seerr-svc"
+      - "traefik.http.services.seerr-svc.loadbalancer.server.port=5055"
+    # DOCKER-LABELS-PLACEHOLDER

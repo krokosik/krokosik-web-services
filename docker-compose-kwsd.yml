@@ -44,6 +44,8 @@ secrets:
     file: $DOCKERDIR/secrets/fireflyiii_app_key
   fireflyiii_cron_token:
     file: $DOCKERDIR/secrets/fireflyiii_cron_token
+  fireflyiii_pat:
+    file: $DOCKERDIR/secrets/fireflyiii_pat
 
 include:
   ########################### SERVICES
@@ -67,7 +69,7 @@ include:
 
   ########################### MEDIA SERVICES
   - compose/$HOSTNAME/jellyfin.yml
-  - compose/$HOSTNAME/jellyseerr.yml
+  - compose/$HOSTNAME/seerr.yml
 
   ########################### STARR SERVICES
   - compose/$HOSTNAME/sonarr.yml
