@@ -36,6 +36,8 @@ secrets:
     file: $DOCKERDIR/secrets/authentik_secret_key
   crowdsec_bouncer_traefik_key:
     file: $DOCKERDIR/secrets/crowdsec_bouncer_traefik_key
+  immich_db_password:
+    file: $DOCKERDIR/secrets/immich_db_password
 
 include:
   ########################### SERVICES
@@ -47,6 +49,9 @@ include:
   # - compose/$HOSTNAME/ddns-updater.yml
   - compose/$HOSTNAME/traefik.yml
   - compose/$HOSTNAME/dozzle.yml
+
+  - compose/$HOSTNAME/redis.yml
+  - compose/$HOSTNAME/immich.yml
 
   ########################### POSTGRESQL RELATED
   - compose/$HOSTNAME/postgresql.yml

@@ -1,0 +1,98 @@
+services:
+  # Immich - Photo/video server
+  immich:
+    container_name: immich
+    image: ghcr.io/immich-app/immich-server:$IMMICH_VERSION
+    profiles: ["apps", "all"]
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - default
+      - traefik_proxy
+    # ports:
+    #   - "${IMMICH_PORT}:2283"
+    depends_on:
+      - redis
+      - immich-db
+    healthcheck:
+      disable: false
+    devices:
+      - /dev/dri:/dev/dri
+    environment:
+      DB_PASSWORD_FILE: /run/secrets/immich_db_password
+      DB_HOSTNAME: immich-db
+      DB_USERNAME: postgres
+      DB_DATABASE_NAME: immich
+      REDIS_HOSTNAME: redis
+    volumes:
+      - $SHARE_DIR/images:/usr/src/app/upload
+      - /etc/localtime:/etc/localtime:ro
+    labels:
+      - "traefik.enable=true"
+      # HTTP Routers
+      - "traefik.http.routers.immich-rtr.entrypoints=websecure"
+      - "traefik.http.routers.immich-rtr.rule=Host(`immich.$DOMAIN_NAME`)"
+      # Middlewares
+      - "traefik.http.routers.immich-rtr.middlewares=chain-no-auth@file"
+      # HTTP Services
+      - "traefik.http.routers.immich-rtr.service=immich-svc"
+      - "traefik.http.services.immich-svc.loadbalancer.server.port=2283"
+    secrets:
+      - immich_db_password
+    # DOCKER-LABELS-PLACEHOLDER
+  
+  immich-db:
+    container_name: immich-db
+    profiles: ["apps", "all"]
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - default
+    image: ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0@sha256:bcf63357191b76a916ae5eb93464d65c07511da41e3bf7a8416db519b40b1c23
+    environment:
+      POSTGRES_PASSWORD_FILE: /run/secrets/immich_db_password
+      POSTGRES_USER: postgres
+      POSTGRES_DB: immich
+      POSTGRES_INITDB_ARGS: '--data-checksums'
+      # Uncomment the DB_STORAGE_TYPE: 'HDD' var if your database isn't stored on SSDs
+      # DB_STORAGE_TYPE: 'HDD'
+    volumes:
+      # Do not edit the next line. If you want to change the database storage location on your system, edit the value of DB_DATA_LOCATION in the .env file
+      - $DOCKERDIR/appdata/immich/db:/var/lib/postgresql/data
+    shm_size: 128mb
+    restart: always
+    secrets:
+      - immich_db_password
+    healthcheck:
+      test: >-
+        pg_isready --dbname="immich" --username="postgres" || exit 1;
+        Chksum="$$(psql --dbname="immich" --username="postgres" --tuples-only --no-align
+        --command='SELECT COALESCE(SUM(checksum_failures), 0) FROM pg_stat_database')";
+        echo "checksum failure count is $$Chksum";
+        [ "$$Chksum" = '0' ] || exit 1
+      interval: 5m
+      start_interval: 30s
+      start_period: 5m
+  
+  immich-ml:
+    # For hardware acceleration, add one of -[armnn, cuda, openvino] to the image tag.
+    # Example tag: ${IMMICH_VERSION:-release}-cuda
+    image: ghcr.io/immich-app/immich-machine-learning:$IMMICH_VERSION-openvino
+    container_name: immich-ml
+    profiles: ["apps", "all"]
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - default
+    device_cgroup_rules:
+      - 'c 189:* rmw'
+    devices:
+      - /dev/dri:/dev/dri
+    volumes:
+      - /dev/bus/usb:/dev/bus/usb
+      - $DOCKERDIR/appdata/immich/ml:/cache
+    healthcheck:
+      disable: false
+    # DOCKER-LABELS-PLACEHOLDER
