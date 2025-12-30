@@ -61,7 +61,8 @@ include:
   - compose/$HOSTNAME/redis.yml
   - compose/$HOSTNAME/immich.yml
   - compose/$HOSTNAME/fireflyiii.yml
-
+  - compose/$HOSTNAME/shlink.yml
+  
   ########################### POSTGRESQL RELATED
   - compose/$HOSTNAME/postgresql.yml
   - compose/$HOSTNAME/authentik.yml

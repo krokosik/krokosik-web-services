@@ -1,0 +1,28 @@
+services:
+  # Shlink - URL shortener
+  shlink:
+    image: shlinkio/shlink:stable
+    container_name: shlink
+    profiles: ["apps", "all"]
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - default
+      - traefik_proxy
+    environment:
+      - DEFAULT_DOMAIN=s.krokosik.com
+      - IS_HTTPS_ENABLED=true
+      - DB_DRIVER=sqlite
+      - DEFAULT_QR_CODE_ERROR_CORRECTION=H
+      - TZ=$TZ
+    labels:
+      - "traefik.enable=true"
+      # HTTP Routers
+      - "traefik.http.routers.shlink-rtr.entrypoints=websecure"
+      - "traefik.http.routers.shlink-rtr.rule=Host(`s.$DOMAIN_NAME`)"
+      # Middlewares
+      - "traefik.http.routers.shlink-rtr.middlewares=chain-no-auth@file"
+      # HTTP Services
+      - "traefik.http.routers.shlink-rtr.service=shlink-svc"
+      - "traefik.http.services.shlink-svc.loadbalancer.server.port=8080"
