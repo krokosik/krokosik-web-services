@@ -1,0 +1,67 @@
+########################### NETWORKS
+networks:
+  default:
+    driver: bridge
+  socket_proxy:
+    name: socket_proxy
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.91.0/24
+  traefik_proxy:
+    name: traefik_proxy
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.90.0/24
+
+secrets:
+  wg_private_key:
+    file: $DOCKERDIR/secrets/wg_private_key
+  ddns_updater_config:
+    file: $DOCKERDIR/secrets/ddns_updater_config
+  cf_dns_api_token:
+    file: $DOCKERDIR/secrets/cf_dns_api_token
+  cf_zone_api_token:
+    file: $DOCKERDIR/secrets/cf_zone_api_token
+  cf_tunnel_token:
+    file: $DOCKERDIR/secrets/cf_tunnel_token
+  postgres_default_password:
+    file: $DOCKERDIR/secrets/postgres_default_password
+  authentik_postgresql_user:
+    file: $DOCKERDIR/secrets/authentik_postgresql_user
+  authentik_postgresql_password:
+    file: $DOCKERDIR/secrets/authentik_postgresql_password
+  authentik_secret_key:
+    file: $DOCKERDIR/secrets/authentik_secret_key
+  crowdsec_bouncer_traefik_key:
+    file: $DOCKERDIR/secrets/crowdsec_bouncer_traefik_key
+
+include:
+  ########################### SERVICES
+  # HOSTNAME defined in .env file
+  - compose/$HOSTNAME/socket-proxy.yml
+  - compose/$HOSTNAME/cloudflare-tunnel.yml
+  - compose/$HOSTNAME/cloudflare-bouncer.yml
+  - compose/$HOSTNAME/crowdsec.yml
+  # - compose/$HOSTNAME/ddns-updater.yml
+  - compose/$HOSTNAME/traefik.yml
+  - compose/$HOSTNAME/dozzle.yml
+
+  ########################### POSTGRESQL RELATED
+  - compose/$HOSTNAME/postgresql.yml
+  - compose/$HOSTNAME/authentik.yml
+
+  ########################### MEDIA SERVICES
+  - compose/$HOSTNAME/jellyfin.yml
+  - compose/$HOSTNAME/jellyseerr.yml
+
+  ########################### STARR SERVICES
+  - compose/$HOSTNAME/sonarr.yml
+  - compose/$HOSTNAME/radarr.yml
+  - compose/$HOSTNAME/bazarr.yml
+  - compose/$HOSTNAME/flaresolverr.yml
+  - compose/$HOSTNAME/qbittorrent.yml
+  - compose/$HOSTNAME/gluetun.yml
+  - compose/$HOSTNAME/prowlarr.yml
+  - compose/$HOSTNAME/tdarr.yml

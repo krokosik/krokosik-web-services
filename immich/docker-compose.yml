@@ -22,6 +22,8 @@ services:
       - /etc/localtime:/etc/localtime:ro
     env_file:
       - .env
+    ports:
+      - 2283:2283
     expose:
       - '2283'
     depends_on:
@@ -34,11 +36,12 @@ services:
       - "traefik.http.routers.immich.entrypoints=websecure"
       - "traefik.http.routers.immich.tls.certresolver=cfResolver"
       - "traefik.http.services.immich.loadbalancer.server.port=2283"
-    healthcheck:
-      disable: false
+      - "traefik.docker.network=krokosik-web-services"
     networks:
       - krokosik-web-services
       - default
+    healthcheck:
+      disable: false
 
   immich-machine-learning:
     container_name: immich_machine_learning

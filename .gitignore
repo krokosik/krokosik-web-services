@@ -1,2 +1,5 @@
 **.env
 **/library
+logs/
+secrets/
+appdata/

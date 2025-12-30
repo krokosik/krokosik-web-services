@@ -1,0 +1,35 @@
+services:
+  #Tdarr - transcodes videos from one format to another like x265 or H.265
+  #This container requires a decent amount of horse power to run but will save space in the long run
+  tdarr:
+    image: ghcr.io/haveagitgat/tdarr:latest
+    container_name: tdarr
+    security_opt:
+      - no-new-privileges:true
+    restart: "no"
+    profiles: ["media", "starr", "all"]
+    networks:
+      - default
+    ports:
+      - $TDARR_WEBUI_PORT:8265 # webUI port
+      - $TDARR_SERVER_PORT:8266 # server port
+    environment:
+      TZ: $TZ
+      PUID: $PUID
+      PGID: $PGID
+      UMASK_SET: 002
+      nodeName: ServerNode
+      serverIP: 0.0.0.0
+      serverPort: $TDARR_SERVER_PORT
+      webUIPort: $TDARR_WEBUI_PORT
+      internalNode: true
+      inContainer: true
+      ffmpegVersion: 7
+    volumes:
+      - $DOCKERDIR/appdata/tdarr/server:/app/server
+      - $DOCKERDIR/appdata/tdarr/configs:/app/configs
+      - $DOCKERDIR/appdata/tdarr/logs:/app/logs
+      - $SHARE_DIR:/data
+      - ${TRANSCODE_PATH:-/transcode_cache}:/temp
+    devices:
+     - /dev/dri:/dev/dri #Required for HW transcoding /share QuickSync

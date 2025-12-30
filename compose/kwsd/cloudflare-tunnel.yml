@@ -1,0 +1,30 @@
+services:
+  # Cloudflare Tunnel - Private Network over Internet
+  cloudflare-tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflare-tunnel
+    restart: unless-stopped
+    profiles: ["core", "all"]
+    # network_mode: host
+    networks:
+      traefik_proxy:
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    command: tunnel --no-autoupdate run
+    healthcheck:
+      test: ["CMD", "cloudflared", "--version"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    devices:
+      - /dev/net/tun
+    volumes:
+      - $DOCKERDIR/appdata/cloudflare-tunnel/hosts:/etc/hosts # Mount hosts file from host to container
+      - /etc/localtime:/etc/localtime:ro  # Synchronize time with the host
+    environment:
+      TUNNEL_TOKEN_FILE: /run/secrets/cf_tunnel_token
+    secrets:
+      - cf_tunnel_token
+    # DOCKER-LABELS-PLACEHOLDER

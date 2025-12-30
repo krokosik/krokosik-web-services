@@ -1,0 +1,34 @@
+services:
+  # Sonarr - TV Shows Management
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    security_opt:
+      - no-new-privileges:true
+    restart: "no"
+    profiles: ["media", "starr", "all"]
+    networks:
+      - traefik_proxy
+    # ports:
+    #   - "$SONARR_PORT:8989"
+    volumes:
+      - $DOCKERDIR/appdata/sonarr:/config
+      - $MEDIA_DIR:/data/media
+      - $DOWNLOADS_DIR:/data/downloads 
+      - "/etc/localtime:/etc/localtime:ro"
+    environment:
+      TZ: $TZ
+      PUID: $PUID
+      PGID: $PGID
+    labels:
+      - "traefik.enable=true"
+      # HTTP Routers
+      - "traefik.http.routers.sonarr-rtr.entrypoints=websecure"
+      - "traefik.http.routers.sonarr-rtr.rule=Host(`sonarr.$DOMAIN_NAME`)"
+      # Middlewares
+      - "traefik.http.routers.sonarr-rtr.middlewares=chain-no-auth@file"
+      # HTTP Services
+      - "traefik.http.routers.sonarr-rtr.service=sonarr-svc"
+      - "traefik.http.services.sonarr-svc.loadbalancer.server.port=8989"
+    # DOCKER-LABELS-PLACEHOLDER
+    

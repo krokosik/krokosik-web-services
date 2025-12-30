@@ -1,0 +1,48 @@
+services:
+  # Gluetun - VPN Client for Docker Containers and More
+  # Gluetun only for use by torrent clients + on demand lan devices.
+  # Arr apps do not need VPN (not recommended), unless you have ISP/country restrictions.
+  gluetun:
+    image: qmcgaw/gluetun:latest
+    container_name: gluetun
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    profiles: ["core", "all"]
+    networks:
+      - default
+      - traefik_proxy
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun
+    ports:
+      - $QBITTORRENT_PORT:8080 # qBittorrent available at http://DOCKER-HOST-IP:$QBITTORRENT_PORT
+      # - 8888:8888/tcp # HTTP proxy
+      # - 8388:8388/tcp # Shadowsocks
+      # - 8388:8388/udp # Shadowsocks
+    volumes:
+      - $DOCKERDIR/appdata/gluetun:/gluetun
+    environment:
+      TZ: $TZ
+      VPN_SERVICE_PROVIDER: protonvpn
+      VPN_TYPE: wireguard
+      WIREGUARD_PRIVATE_KEY_SECRETFILE: /run/secrets/wg_private_key
+      SERVER_COUNTRIES: Poland
+      UPDATER_PERIOD: 24h
+      VPN_PORT_FORWARDING: on
+      WIREGUARD_MTU: ${WIREGUARD_MTU:-1200}
+      VPN_PORT_FORWARDING_UP_COMMAND: "/bin/sh -c 'wget -O- --retry-connrefused --post-data \"json={\"listen_port\":{{PORTS}}}\" http://127.0.0.1:8080/api/v2/app/setPreferences 2>&1'"
+    secrets:
+      - wg_private_key
+    labels:
+      - "traefik.enable=true"
+      # HTTP Routers
+      - "traefik.http.routers.qbit-rtr.entrypoints=websecure"
+      - "traefik.http.routers.qbit-rtr.rule=Host(`qbit.$DOMAIN_NAME`)"
+      # Middlewares
+      - "traefik.http.routers.qbit-rtr.middlewares=chain-no-auth@file"
+      # HTTP Services
+      - "traefik.http.routers.qbit-rtr.service=qbit-svc"
+      - "traefik.http.services.qbit-svc.loadbalancer.server.port=8080"
+    # DOCKER-LABELS-PLACEHOLDER

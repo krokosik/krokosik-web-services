@@ -1,0 +1,42 @@
+services:
+  # Jellyfin - Media Server
+  jellyfin:
+    image: lscr.io/linuxserver/jellyfin:latest
+    container_name: jellyfin
+    security_opt:
+      - no-new-privileges:true
+    restart: "no"
+    profiles: ["media", "all"]
+    networks:
+      - default
+      - traefik_proxy
+    # user: $PUID:$PGID # rootless breaks linux server mods
+    devices:
+      - /dev/dri:/dev/dri #optional, for hardware acceleration
+    # ports:
+    #   - "$JELLYFIN_PORT:8096"
+      # - "$EMBY_PORT:8920" # Optional - Https webUI (you need to set up your own certificate).
+      # - 7359:7359/udp # Optional - Allows clients to discover Jellyfin on the local network.
+      # - 1900:1900/udp # Optional - Allows DLNA clients to discover the server.
+    environment:
+      PUID: $PUID
+      PGID: $PGID
+      UMASK_SET: 022
+      TZ: $TZ
+      DOCKER_MODS: linuxserver/mods:jellyfin-opencl-intel
+    volumes:
+      - $DOCKERDIR/appdata/jellyfin:/config
+      - $DOWNLOADS_DIR:/data/downloads
+      - $MEDIA_DIR:/data/media
+      # - /dev/shm:/data/transcode # Offload transcoding to RAM if you have enough RAM
+    labels:
+      - "traefik.enable=true"
+      # HTTP Routers
+      - "traefik.http.routers.jellyfin-rtr.entrypoints=websecure"
+      - "traefik.http.routers.jellyfin-rtr.rule=Host(`jellyfin.$DOMAIN_NAME`)"
+      # Middlewares
+      - "traefik.http.routers.jellyfin-rtr.middlewares=chain-no-auth@file"
+      # HTTP Services
+      - "traefik.http.routers.jellyfin-rtr.service=jellyfin-svc"
+      - "traefik.http.services.jellyfin-svc.loadbalancer.server.port=8096"
+    # DOCKER-LABELS-PLACEHOLDER

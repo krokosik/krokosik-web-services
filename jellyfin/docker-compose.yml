@@ -4,6 +4,8 @@ networks:
   jellystat:
   gluetun_network:
     external: true
+  krokosik-web-services:
+    external: true
 
 services:
   jellyfin:
@@ -17,6 +19,9 @@ services:
       - TZ=${TZ}
       - JELLYFIN_PublishedServerUrl=${JELLYFIN_URL} #optional
       - DOCKER_MODS=linuxserver/mods:jellyfin-opencl-intel
+    expose:
+      - 8096
+      - 8920
     ports:
       - 8096:8096
       - 8920:8920
@@ -26,7 +31,15 @@ services:
       - ${BASE_PATH}/jellyfin/config:/config
       - ${MEDIA_SHARE}/media:/media
     restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.jellyfin.rule=Host(`jellyfin.ts.krokosik.com`)"
+      - "traefik.http.routers.jellyfin.entrypoints=websecure"
+      - "traefik.http.routers.jellyfin.tls.certresolver=cfResolver"
+      - "traefik.http.services.jellyfin.loadbalancer.server.port=8096"
+      - "traefik.docker.network=krokosik-web-services"
     networks:
+      - krokosik-web-services
       - starr
     
   #Radarr - used to find movies automatically
@@ -122,7 +135,17 @@ services:
       - ${BASE_PATH}/jellyseerr/config:/app/config
       - ${MEDIA_SHARE}:/data #Access to the entire ${BASE_PATH}
     networks:
+      - krokosik-web-services
       - starr
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.jellyseerr.rule=Host(`jellyseerr.ts.krokosik.com`)"
+      - "traefik.http.routers.jellyseerr.entrypoints=websecure"
+      - "traefik.http.routers.jellyseerr.tls.certresolver=cfResolver"
+      - "traefik.http.services.jellyseerr.loadbalancer.server.port=5055"
+      - "traefik.docker.network=krokosik-web-services"
+    expose:
+      - 5055
     ports:
       - 5055:5055
     restart: unless-stopped

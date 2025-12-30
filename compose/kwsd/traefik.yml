@@ -1,0 +1,111 @@
+services:
+  # Traefik 3 - Reverse Proxy
+  traefik:
+    container_name: traefik
+    image: traefik:$TRAEFIK_VERSION
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    profiles: ["core", "all"]
+    depends_on:
+      - socket-proxy
+    networks:
+      traefik_proxy:
+        ipv4_address: 192.168.90.254 # You can specify a static IP
+      socket_proxy:
+    command: # CLI arguments
+      - --global.checkNewVersion=true
+      - --global.sendAnonymousUsage=false
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      - --entrypoints.traefik.address=:8080
+      - --entrypoints.websecure.http3=true
+      # Disabled as we are using Cloudflare for HTTPS redirection
+      - --entrypoints.web.http.redirections.entrypoint.to=websecure
+      - --entrypoints.web.http.redirections.entrypoint.scheme=https
+      - --entrypoints.web.http.redirections.entrypoint.permanent=true
+      - --api=true
+      - --api.dashboard=true
+      - --api.insecure=true
+      - --serversTransport.insecureSkipVerify=true # only for self-signed certificates - not recommended
+      # guide on better way https://www.simplehomelab.com/proxmox-web-interface-behind-traefik/
+      # Allow these IPs to set the X-Forwarded-* headers - Cloudflare IPs: https://www.cloudflare.com/ips/
+      - --entrypoints.websecure.forwardedHeaders.trustedIPs=$CLOUDFLARE_IPS,$LOCAL_IPS,$TAILSCALE_IPS
+
+      # Logging Configuration
+      - --log=true
+      # - --log.filePath=/logs/traefik.log
+      - --log.level=DEBUG # (Default: error) DEBUG, INFO, WARN, ERROR, FATAL, PANIC
+      - --accessLog=true
+      - --accessLog.filePath=/logs/access.log
+      # - --accessLog.bufferingSize=100 # Configuring a buffer of 100 lines
+      - --accessLog.filters.statusCodes=204-299,400-499,500-599
+
+      # Docker Provider Configuration
+      - --providers.docker=true
+      # - --providers.docker.endpoint=unix:///var/run/docker.sock # Disable for Socket Proxy. Enable otherwise.
+      - --providers.docker.endpoint=$DOCKER_HOST # Enable for Socket Proxy. Disable otherwise.
+      - --providers.docker.exposedByDefault=false
+      - --providers.docker.network=traefik_proxy
+      # - --providers.swarm.endpoint=tcp://127.0.0.1:2377 # Traefik v3 Swarm
+      - --entrypoints.websecure.http.tls=true
+      - --entrypoints.websecure.http.tls.options=tls-opts@file
+      # Add cfResolver as default certresolver for all services. Also enables TLS and no need to specify on individual services
+      - --entrypoints.websecure.http.tls.certresolver=cfResolver
+      - --entrypoints.websecure.http.tls.domains[0].main=$DOMAIN_NAME
+      - --entrypoints.websecure.http.tls.domains[0].sans=*.$DOMAIN_NAME
+      - --entrypoints.websecure.http.tls.domains[1].main=$TAILSCALE_DOMAIN_NAME
+      - --entrypoints.websecure.http.tls.domains[1].sans=*.$TAILSCALE_DOMAIN_NAME
+      # - DOMAINS-PLACEHOLDER-DO-NOT-DELETE
+      - --providers.file.directory=/rules # Load dynamic configuration from one or more .toml or .yml files in a directory
+      - --providers.file.watch=true # Only works on top level files in the rules folder
+      # - --certificatesResolvers.cfResolver.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory # LetsEncrypt Staging Server - uncomment when testing
+      - --certificatesResolvers.cfResolver.acme.storage=/acme.json
+      - --certificatesResolvers.cfResolver.acme.dnsChallenge.provider=cloudflare
+      - --certificatesResolvers.cfResolver.acme.dnsChallenge.resolvers=1.1.1.1:53,1.0.0.1:53
+      - --certificatesResolvers.cfResolver.acme.dnsChallenge.propagation.delaybeforechecks=120 # To delay DNS check and reduce LE hitrate
+      - --certificatesResolvers.cfResolver.acme.dnsChallenge.propagation.disablechecks=true # Not recommended
+      # Plugins
+      # CrowdSec Traefik Bouncer Plugin
+      - --experimental.plugins.crowdsec.moduleName=github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin
+      - --experimental.plugins.crowdsec.version=v1.4.6
+      # GeoIP Plugin
+      - --experimental.plugins.geoblock.modulename=github.com/nscuro/traefik-plugin-geoblock
+      - --experimental.plugins.geoblock.version=v0.14.0
+      # Theme Park Plugin
+      # - --experimental.plugins.themepark.modulename=github.com/packruler/traefik-themepark
+      # - --experimental.plugins.themepark.version=v1.4.2
+      # - METRICS-PLACEHOLDER-DO-NOT-DELETE
+    ports:
+      # - "80:80"
+      # - "443:443"
+      - "$TRAEFIK_PORT:8080"
+    volumes:
+      - $DOCKERDIR/appdata/traefik/rules/$HOSTNAME:/rules
+      # - /var/run/docker.sock:/var/run/docker.sock:ro # Use Docker Socket Proxy instead for improved security
+      - $DOCKERDIR/appdata/traefik/acme/acme.json:/acme.json
+      - $DOCKERDIR/logs/$HOSTNAME/traefik:/logs
+      - $DOCKERDIR/appdata/traefik/plugins:/plugins-local # Geoblock database
+    environment:
+      TZ: $TZ
+      CF_DNS_API_TOKEN_FILE: /run/secrets/cf_dns_api_token
+      CF_ZONE_API_TOKEN_FILE: /run/secrets/cf_zone_api_token
+      CLOUDFLARE_EMAIL: $CF_API_EMAIL
+      DOMAIN_NAME: $DOMAIN_NAME # Passing the domain name to traefik container to be able to use the variable in rules.
+      TAILSCALE_DOMAIN_NAME: $TAILSCALE_DOMAIN_NAME
+      # - TRAEFIK_AUTH_BYPASS_KEY
+    secrets:
+      - cf_dns_api_token
+      - cf_zone_api_token
+      - crowdsec_bouncer_traefik_key
+    labels:
+      - "traefik.enable=true"
+      # HTTP Routers
+      - "traefik.http.routers.traefik-rtr.rule=Host(`traefik.$DOMAIN_NAME`)"
+      # Services - API
+      - "traefik.http.routers.traefik-rtr.service=api@internal"
+      # Middlewares
+      - "traefik.http.routers.traefik-rtr.middlewares=chain-authentik@file"
+      
+    # DOCKER-LABELS-PLACEHOLDER
+

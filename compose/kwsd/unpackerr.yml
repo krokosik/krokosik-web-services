@@ -1,0 +1,38 @@
+services:
+  #Unpacker - Used to unzip zipped files
+  unpackerr:
+    image: ghcr.io/hotio/unpackerr:latest
+    container_name: unpackerr
+    security_opt:
+      - no-new-privileges:true
+    restart: "no"
+    profiles: ["media", "starr", "all"]
+    networks:
+      - default
+    volumes:
+      # You need at least this one volume mapped so Unpackerr can find your files to extract.
+      # Make sure this matches your Starr apps; the folder mount (/downloads or /data) should be identical.
+      - $DOWNLOADS_DIR:/downloads
+      - $DOCKERDIR/appdata/unpackerr:/config
+    # What you see below are defaults for this compose. You only need to modify things specific to your environment.
+    # Remove apps and feature configs you do not use or need. 
+    # ie. Remove all lines that begin with UN_CMDHOOK, UN_WEBHOOK, UN_FOLDER, UN_WEBSERVER, and other apps you do not use.
+    environment:
+      PUID: $PUID
+      PGID: $PGID
+      UN_START_DELAY: 1m
+      UMASK: 002
+      TZ: $TZ
+      #- UN_DEBUG=true
+      # Sonarr Config
+      UN_SONARR_0_URL: http://sonarr:$SONARR_PORT
+      UN_SONARR_0_API_KEY: ${SONARR_KEY}
+      #- UN_SONARR_0_PATHS_0=/${BASE_PATH}/downloads/shows
+      UN_SONARR_0_TIMEOUT: 10s
+      #- UN_SONARR_0_PATHS_0=/${BASE_PATH}/downloads/shows
+      # Radarr Config
+      UN_RADARR_0_URL: http://radarr:7878
+      UN_RADARR_0_API_KEY: ${RADARR_KEY}
+      #- UN_RADARR_0_PATHS_0=/${BASE_PATH}/downloads/movies
+      UN_RADARR_0_TIMEOUT: 10s
+      #- UN_RADARR_0_PATHS_0=/${BASE_PATH}/downloads/movies
