@@ -46,6 +46,8 @@ secrets:
     file: $DOCKERDIR/secrets/fireflyiii_cron_token
   fireflyiii_pat:
     file: $DOCKERDIR/secrets/fireflyiii_pat
+  proton_smtp_token:
+    file: $DOCKERDIR/secrets/proton_smtp_token
 
 include:
   ########################### SERVICES
@@ -54,7 +56,7 @@ include:
   - compose/$HOSTNAME/cloudflare-tunnel.yml
   - compose/$HOSTNAME/cloudflare-bouncer.yml
   - compose/$HOSTNAME/crowdsec.yml
-  # - compose/$HOSTNAME/ddns-updater.yml
+  - compose/$HOSTNAME/smtp-relay.yml
   - compose/$HOSTNAME/traefik.yml
   - compose/$HOSTNAME/dozzle.yml
 

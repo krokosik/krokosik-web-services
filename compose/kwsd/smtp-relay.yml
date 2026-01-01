@@ -1,0 +1,29 @@
+services:
+  smtp-relay:
+    image: crazymax/msmtpd:latest
+    container_name: smtp-relay
+    security_opt:
+      - no-new-privileges:true
+    profiles: ["apps", "all"]
+    networks:
+      - default
+    restart: always
+    # We bind to the host's localhost only for security
+    ports:
+      - "127.0.0.1:2500:2500"
+    environment:
+      # Replace these with your actual SMTP provider details
+      SMTP_HOST: smtp.protonmail.ch
+      SMTP_PORT: 587
+      SMTP_TLS: "on"
+      SMTP_AUTH: "login"
+      SMTP_STARTTLS: "on"
+      SMTP_USER: kwsd@krokosik.com
+      SMTP_PASSWORD_FILE: /run/secrets/proton_smtp_token 
+      
+      # Security: Allow only local connections
+      # This allows your host (via 127.0.0.1) and docker networks to connect
+      # You might need to adjust the subnet if your host connects via a specific IP
+      ALLOWED_NETWORKS: "127.0.0.1/32 172.18.0.0/16 192.168.0.0/24 10.0.0.0/8"
+    secrets:
+      - proton_smtp_token

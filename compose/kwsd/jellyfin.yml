@@ -26,8 +26,8 @@ services:
       DOCKER_MODS: linuxserver/mods:jellyfin-opencl-intel
     volumes:
       - $DOCKERDIR/appdata/jellyfin:/config
-      - $DOWNLOADS_DIR:/data/downloads
-      - $MEDIA_DIR:/data/media
+      - $DOWNLOADS_DIR:/downloads
+      - $MEDIA_DIR:/media
       # - /dev/shm:/data/transcode # Offload transcoding to RAM if you have enough RAM
     labels:
       - "traefik.enable=true"
