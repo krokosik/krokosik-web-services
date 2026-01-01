@@ -1,0 +1,28 @@
+services:
+  # Watchtower - Container Monitoring and Management
+  watchtower:
+    image: nickfedor/watchtower
+    container_name: watchtower
+    security_opt:
+      - no-new-privileges:true
+    restart: always
+    profiles: ["all", "monitoring", "apps"]
+    networks:
+      - default
+      - socket_proxy
+    depends_on:
+      - socket-proxy
+    environment:
+      TZ: $TZ
+      WATCHTOWER_CLEANUP: true                                        
+      WATCHTOWER_INCLUDE_RESTARTING: true
+      WATCHTOWER_SCHEDULE: "0 0 4 * * *"
+      WATCHTOWER_NO_STARTUP_MESSAGE: true
+      WATCHTOWER_NOTIFICATIONS: email
+      WATCHTOWER_NOTIFICATION_EMAIL_FROM: kwsd@krokosik.com
+      WATCHTOWER_NOTIFICATION_EMAIL_TO: krokosik+kws@pm.me
+      WATCHTOWER_NOTIFICATION_EMAIL_SERVER: smtp-relay
+      WATCHTOWER_NOTIFICATION_EMAIL_SERVER_PORT: 2500
+      WATCHTOWER_NOTIFICATION_EMAIL_DELAY: 2
+      DOCKER_HOST: $DOCKER_HOST
+    # DOCKER-LABELS-PLACEHOLDER

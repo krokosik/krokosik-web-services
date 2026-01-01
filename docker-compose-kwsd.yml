@@ -59,6 +59,7 @@ include:
   - compose/$HOSTNAME/smtp-relay.yml
   - compose/$HOSTNAME/traefik.yml
   - compose/$HOSTNAME/dozzle.yml
+  - compose/$HOSTNAME/watchtower.yml
 
   - compose/$HOSTNAME/redis.yml
   - compose/$HOSTNAME/immich.yml

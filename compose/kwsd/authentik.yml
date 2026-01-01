@@ -36,7 +36,8 @@ services:
       # - $DOCKERDIR/appdata/authentik/geoip/data:/geoip # requires geoipupdate
       # - /var/run/docker.sock:/var/run/docker.sock # Uncomment if NOT using socket-proxy
       # - $DOCKERDIR/appdata/traefik3/cert_export:/certs:ro # If NOT using reverse proxy, manually map in certificates
-    # DOCKER-LABELS-PLACEHOLDER  
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
 
   authentik:
     image: ghcr.io/goauthentik/server:$AUTHENTIK_VERSION
@@ -87,4 +88,6 @@ services:
       # HTTP Services
       - "traefik.http.routers.authentik-rtr.service=authentik-svc"
       - "traefik.http.services.authentik-svc.loadbalancer.server.port=9000"
+      # Watchtower Label
+      - "com.centurylinklabs.watchtower.enable=false"
     # DOCKER-LABELS-PLACEHOLDER

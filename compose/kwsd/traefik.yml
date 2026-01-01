@@ -107,5 +107,5 @@ services:
       # Middlewares
       - "traefik.http.routers.traefik-rtr.middlewares=chain-authentik@file"
       
-    # DOCKER-LABELS-PLACEHOLDER
+      - "com.centurylinklabs.watchtower.enable=false"
 

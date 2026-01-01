@@ -39,9 +39,9 @@ services:
       - CONTAINERS=1 # Traefik, portainer, etc.
       - DISTRIBUTION=0
       - EXEC=0
-      - IMAGES=0 # Portainer
+      - IMAGES=1 # Watchtower,Portainer
       - INFO=1 # Dozzle, Portainer
-      - NETWORKS=0 # Portainer
+      - NETWORKS=1 # Watchtower,Portainer
       - NODES=0
       - PLUGINS=0
       - SERVICES=0 # Portainer
@@ -49,6 +49,6 @@ services:
       - SWARM=0
       - SYSTEM=0
       - TASKS=0 # Portainer
-      - VOLUMES=0 # Portainer
+      - VOLUMES=1 # Watchtower,Portainer
       - DISABLE_IPV6=0 #optional
     # DOCKER-LABELS-PLACEHOLDER

@@ -24,4 +24,5 @@ services:
       interval: 1m
       timeout: 5s
       retries: 3
-    # DOCKER-LABELS-PLACEHOLDER  
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"

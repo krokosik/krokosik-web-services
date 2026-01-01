@@ -23,4 +23,5 @@ services:
       resources:
         limits:
           memory: 256MB
-    # DOCKER-LABELS-PLACEHOLDER
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
