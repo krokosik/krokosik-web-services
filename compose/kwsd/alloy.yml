@@ -1,0 +1,25 @@
+services:
+  # Alloy - Grafana Alloy for OpenTelemetry collection and distribution
+  alloy:
+    image: grafana/alloy:latest
+    container_name: alloy
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    profiles: ["otel", "all"]
+    networks:
+      - default
+      - socket_proxy
+    volumes:
+      - $DOCKERDIR/appdata/alloy:/etc/alloy
+    command:
+      - run
+      - /etc/alloy/config.alloy
+      - --server.http.listen-addr=0.0.0.0:12345
+    depends_on:
+      - prometheus
+      - loki
+      - socket-proxy
+    environment:
+      TZ: $TZ
+      DOCKER_HOST: $DOCKER_HOST

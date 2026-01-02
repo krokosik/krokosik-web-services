@@ -65,6 +65,12 @@ include:
   - compose/$HOSTNAME/immich.yml
   - compose/$HOSTNAME/fireflyiii.yml
   - compose/$HOSTNAME/shlink.yml
+
+  ########################### OTEL SERVICES
+  - compose/$HOSTNAME/loki.yml
+  - compose/$HOSTNAME/prometheus.yml
+  - compose/$HOSTNAME/alloy.yml
+  - compose/$HOSTNAME/grafana.yml
   
   ########################### POSTGRESQL RELATED
   - compose/$HOSTNAME/postgresql.yml

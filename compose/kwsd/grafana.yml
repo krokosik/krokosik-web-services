@@ -1,0 +1,34 @@
+services:
+  # Grafana - Graphical data visualization for InfluxDB data
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    profiles: ["otel", "all"]
+    networks:
+      - default
+      - traefik_proxy
+    # ports:
+    #   - "$GRAFANA_PORT:3000"
+    depends_on:
+      - alloy
+    user: $PUID
+    volumes:
+      - $DOCKERDIR/appdata/grafana/data:/var/lib/grafana
+      - $DOCKERDIR/appdata/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+    environment:
+      GF_INSTALL_PLUGINS: "grafana-clock-panel,grafana-worldmap-panel,grafana-piechart-panel,yesoreyeram-infinity-datasource"
+      # GF_USERS_ALLOW_SIGN_UP: false
+    labels:
+      - "traefik.enable=true"
+      # HTTP Routers
+      - "traefik.http.routers.grafana-rtr.entrypoints=websecure"
+      - "traefik.http.routers.grafana-rtr.rule=Host(`grafana.$DOMAIN_NAME`)"
+      # Middlewares
+      - "traefik.http.routers.grafana-rtr.middlewares=chain-no-auth@file"
+      # HTTP Services
+      - "traefik.http.routers.grafana-rtr.service=grafana-svc"
+      - "traefik.http.services.grafana-svc.loadbalancer.server.port=3000"
+    # DOCKER-LABELS-PLACEHOLDER

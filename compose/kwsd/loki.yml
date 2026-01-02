@@ -1,0 +1,18 @@
+services:
+  # Loki - Log aggregation system
+  loki:
+    image: grafana/loki:latest
+    container_name: loki
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    profiles: ["otel", "all"]
+    networks:
+      - default
+    # ports:
+    #   - "$LOKI_PORT:3100"
+    volumes:
+      - $DOCKERDIR/appdata/loki/config:/etc/loki
+    user: $PUID:$PGID
+    command: -config.file=/etc/loki/loki-config.yaml
+    # DOCKER-LABELS-PLACEHOLDER
