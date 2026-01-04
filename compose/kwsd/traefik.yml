@@ -34,11 +34,11 @@ services:
 
       # Logging Configuration
       - --log=true
-      # - --log.filePath=/logs/traefik.log
-      - --log.level=DEBUG # (Default: error) DEBUG, INFO, WARN, ERROR, FATAL, PANIC
+      - --log.filePath=/logs/traefik.log
+      - --log.level=INFO # (Default: error) DEBUG, INFO, WARN, ERROR, FATAL, PANIC
       - --accessLog=true
       - --accessLog.filePath=/logs/access.log
-      # - --accessLog.bufferingSize=100 # Configuring a buffer of 100 lines
+      - --accessLog.bufferingSize=100 # Configuring a buffer of 100 lines
       - --accessLog.filters.statusCodes=204-299,400-499,500-599
 
       # Docker Provider Configuration
@@ -53,9 +53,7 @@ services:
       # Add cfResolver as default certresolver for all services. Also enables TLS and no need to specify on individual services
       - --entrypoints.websecure.http.tls.certresolver=cfResolver
       - --entrypoints.websecure.http.tls.domains[0].main=$DOMAIN_NAME
-      - --entrypoints.websecure.http.tls.domains[0].sans=*.$DOMAIN_NAME
-      - --entrypoints.websecure.http.tls.domains[1].main=$TAILSCALE_DOMAIN_NAME
-      - --entrypoints.websecure.http.tls.domains[1].sans=*.$TAILSCALE_DOMAIN_NAME
+      - --entrypoints.websecure.http.tls.domains[0].sans=*.$DOMAIN_NAME,*.$TAILSCALE_DOMAIN_NAME
       # - DOMAINS-PLACEHOLDER-DO-NOT-DELETE
       - --providers.file.directory=/rules # Load dynamic configuration from one or more .toml or .yml files in a directory
       - --providers.file.watch=true # Only works on top level files in the rules folder
@@ -77,8 +75,8 @@ services:
       # - --experimental.plugins.themepark.version=v1.4.2
       # - METRICS-PLACEHOLDER-DO-NOT-DELETE
     ports:
-      # - "80:80"
-      # - "443:443"
+      - "80:80"
+      - "443:443"
       - "$TRAEFIK_PORT:8080"
     volumes:
       - $DOCKERDIR/appdata/traefik/rules/$HOSTNAME:/rules
@@ -101,7 +99,7 @@ services:
     labels:
       - "traefik.enable=true"
       # HTTP Routers
-      - "traefik.http.routers.traefik-rtr.rule=Host(`traefik.$DOMAIN_NAME`)"
+      - "traefik.http.routers.traefik-rtr.rule=Host(`traefik.$TAILSCALE_DOMAIN_NAME`)"
       # Services - API
       - "traefik.http.routers.traefik-rtr.service=api@internal"
       # Middlewares

@@ -40,7 +40,7 @@ services:
       - "traefik.enable=true"
       # HTTP Routers
       - "traefik.http.routers.qbit-rtr.entrypoints=websecure"
-      - "traefik.http.routers.qbit-rtr.rule=Host(`qbit.$DOMAIN_NAME`)"
+      - "traefik.http.routers.qbit-rtr.rule=Host(`qbit.$TAILSCALE_DOMAIN_NAME`)"
       # Middlewares
       - "traefik.http.routers.qbit-rtr.middlewares=chain-no-auth@file"
       # HTTP Services

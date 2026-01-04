@@ -24,7 +24,7 @@ services:
       - "traefik.enable=true"
       # HTTP Routers
       - "traefik.http.routers.sonarr-rtr.entrypoints=websecure"
-      - "traefik.http.routers.sonarr-rtr.rule=Host(`sonarr.$DOMAIN_NAME`)"
+      - "traefik.http.routers.sonarr-rtr.rule=Host(`sonarr.$TAILSCALE_DOMAIN_NAME`)"
       # Middlewares
       - "traefik.http.routers.sonarr-rtr.middlewares=chain-no-auth@file"
       # HTTP Services

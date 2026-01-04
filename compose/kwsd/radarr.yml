@@ -25,7 +25,7 @@ services:
       - "traefik.enable=true"
       # HTTP Routers
       - "traefik.http.routers.radarr-rtr.entrypoints=websecure"
-      - "traefik.http.routers.radarr-rtr.rule=Host(`radarr.$DOMAIN_NAME`)"
+      - "traefik.http.routers.radarr-rtr.rule=Host(`radarr.$TAILSCALE_DOMAIN_NAME`)"
       # Middlewares
       - "traefik.http.routers.radarr-rtr.middlewares=chain-no-auth@file"
       # HTTP Services
