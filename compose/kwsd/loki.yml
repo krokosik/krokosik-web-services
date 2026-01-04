@@ -15,4 +15,6 @@ services:
       - $DOCKERDIR/appdata/loki/config:/etc/loki
     user: $PUID:$PGID
     command: -config.file=/etc/loki/loki-config.yaml
+    environment:
+      - TZ=$TZ
     # DOCKER-LABELS-PLACEHOLDER
