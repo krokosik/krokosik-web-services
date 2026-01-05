@@ -9,8 +9,8 @@ services:
     profiles: ["otel", "all"]
     networks:
       - default
-    # ports:
-    #   - "$PROMETHEUS_PORT:9090"
+    ports:
+      - "$PROMETHEUS_PORT:9090"
     volumes:
       - $DOCKERDIR/appdata/prometheus/config:/etc/prometheus
       - $DOCKERDIR/appdata/prometheus/data:/prometheus

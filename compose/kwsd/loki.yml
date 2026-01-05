@@ -9,8 +9,8 @@ services:
     profiles: ["otel", "all"]
     networks:
       - default
-    # ports:
-    #   - "$LOKI_PORT:3100"
+    ports:
+      - "$LOKI_PORT:3100"
     volumes:
       - $DOCKERDIR/appdata/loki/config:/etc/loki
     user: $PUID:$PGID
