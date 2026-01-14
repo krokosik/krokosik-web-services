@@ -1,7 +1,7 @@
 services:
   # CrowdSec Bouncer - Cloudflare
   cloudflare-bouncer:
-    image: crowdsecurity/cloudflare-bouncer
+    image: crowdsecurity/cloudflare-worker-bouncer
     container_name: cloudflare-bouncer
     security_opt:
       - no-new-privileges:true
@@ -12,5 +12,5 @@ services:
     networks:
       - default
     volumes:
-      - $DOCKERDIR/appdata/cloudflare-bouncer/cfg.yaml:/etc/crowdsec/bouncers/crowdsec-cloudflare-bouncer.yaml
+      - $DOCKERDIR/appdata/cloudflare-bouncer/cfg.yaml:/etc/crowdsec/bouncers/crowdsec-cloudflare-worker-bouncer.yaml
     # DOCKER-LABELS-PLACEHOLDER
