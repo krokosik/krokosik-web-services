@@ -1,0 +1,31 @@
+name = "firefly-email-bridge"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+# Email routing - receives emails and forwards to n8n webhook
+[triggers]
+# Email addresses that trigger this worker (configured in CF Dashboard)
+# Route: firefly@krokosik.com -> Worker
+
+[vars]
+# These are non-secret defaults, override with secrets in dashboard
+N8N_WEBHOOK_PATH = "/webhook/mbank-import"
+
+# Add these as secrets in Cloudflare Dashboard:
+# - N8N_WEBHOOK_URL: https://n8n.krokosik.com
+# - WEBHOOK_SECRET: <value from secrets/n8n_webhook_secret>
+
+[observability]
+enabled = false
+head_sampling_rate = 1
+
+[observability.logs]
+enabled = true
+head_sampling_rate = 1
+persist = true
+invocation_logs = true
+
+[observability.traces]
+enabled = false
+persist = true
+head_sampling_rate = 1

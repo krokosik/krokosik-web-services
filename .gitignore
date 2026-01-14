@@ -3,3 +3,5 @@
 logs/
 secrets/
 appdata/
+opencode.jsonc
+node_modules/
