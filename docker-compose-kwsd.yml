@@ -48,6 +48,10 @@ secrets:
     file: $DOCKERDIR/secrets/fireflyiii_pat
   proton_smtp_token:
     file: $DOCKERDIR/secrets/proton_smtp_token
+  n8n_db_password:
+    file: $DOCKERDIR/secrets/n8n_db_password
+  n8n_encryption_key:
+    file: $DOCKERDIR/secrets/n8n_encryption_key
 
 include:
   ########################### SERVICES
@@ -58,12 +62,12 @@ include:
   - compose/$HOSTNAME/crowdsec.yml
   - compose/$HOSTNAME/smtp-relay.yml
   - compose/$HOSTNAME/traefik.yml
-  - compose/$HOSTNAME/dozzle.yml
   - compose/$HOSTNAME/watchtower.yml
 
   - compose/$HOSTNAME/redis.yml
   - compose/$HOSTNAME/immich.yml
   - compose/$HOSTNAME/fireflyiii.yml
+  - compose/$HOSTNAME/n8n.yml
   - compose/$HOSTNAME/shlink.yml
 
   ########################### OTEL SERVICES

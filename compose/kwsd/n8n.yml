@@ -1,0 +1,54 @@
+services:
+  # n8n - Workflow Automation
+  n8n:
+    container_name: n8n
+    image: n8nio/n8n:$N8N_VERSION
+    profiles: ["apps", "all"]
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - default
+      - traefik_proxy
+    depends_on:
+      - postgresql
+    volumes:
+      - $DOCKERDIR/appdata/n8n:/home/node/.n8n
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      TZ: $TZ
+      GENERIC_TIMEZONE: $TZ
+      # Database
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: postgresql
+      DB_POSTGRESDB_PORT: 5432
+      DB_POSTGRESDB_DATABASE: n8n
+      DB_POSTGRESDB_USER: n8n_db_user
+      DB_POSTGRESDB_PASSWORD: $N8N_DB_PASSWORD
+      # Security
+      N8N_ENCRYPTION_KEY: $N8N_ENCRYPTION_KEY
+      # URLs
+      N8N_HOST: n8n.$DOMAIN_NAME
+      N8N_PROTOCOL: https
+      WEBHOOK_URL: https://n8n.$DOMAIN_NAME/
+      N8N_PROXY_HOPS: 1
+      # Execution settings
+      EXECUTIONS_DATA_PRUNE: "true"
+      EXECUTIONS_DATA_MAX_AGE: 168
+    labels:
+      - "traefik.enable=true"
+      # HTTP Routers
+      - "traefik.http.routers.n8n-rtr.entrypoints=websecure"
+      - "traefik.http.routers.n8n-rtr.rule=Host(`n8n.$DOMAIN_NAME`)"
+      # Middlewares
+      - "traefik.http.routers.n8n-rtr.middlewares=chain-authentik@file"
+      # HTTP Services
+      - "traefik.http.routers.n8n-rtr.service=n8n-svc"
+      - "traefik.http.services.n8n-svc.loadbalancer.server.port=5678"
+
+      # Webhook router - No auth (webhook validates via X-Webhook-Secret)
+      - "traefik.http.routers.n8n-webhook-rtr.entrypoints=websecure"
+      - "traefik.http.routers.n8n-webhook-rtr.rule=Host(`n8n.$DOMAIN_NAME`) && PathPrefix(`/webhook`)"
+      - "traefik.http.routers.n8n-webhook-rtr.middlewares=chain-no-auth@file"
+      - "traefik.http.routers.n8n-webhook-rtr.service=n8n-svc"
+      - "traefik.http.routers.n8n-webhook-rtr.priority=100"
