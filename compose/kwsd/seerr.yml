@@ -34,4 +34,5 @@ services:
       # HTTP Services
       - "traefik.http.routers.seerr-rtr.service=seerr-svc"
       - "traefik.http.services.seerr-svc.loadbalancer.server.port=5055"
+      - "com.centurylinklabs.watchtower.enable=false"
     # DOCKER-LABELS-PLACEHOLDER
