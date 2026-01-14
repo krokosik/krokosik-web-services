@@ -24,6 +24,7 @@ services:
       - --entrypoints.web.http.redirections.entrypoint.to=websecure
       - --entrypoints.web.http.redirections.entrypoint.scheme=https
       - --entrypoints.web.http.redirections.entrypoint.permanent=true
+      - --ping=true
       - --api=true
       - --api.dashboard=true
       - --api.insecure=true
