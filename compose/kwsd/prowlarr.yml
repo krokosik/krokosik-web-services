@@ -10,8 +10,8 @@ services:
     networks:
       - default
       - traefik_proxy
-    # ports:
-    #   - "$PROWLARR_PORT:9696"
+    ports:
+      - "$PROWLARR_PORT:9696"
     volumes:
       - $DOCKERDIR/appdata/prowlarr:/config
       - $DOWNLOADS_DIR:/data/downloads
@@ -24,7 +24,7 @@ services:
       - "traefik.enable=true"
       # HTTP Routers
       - "traefik.http.routers.prowlarr-rtr.entrypoints=websecure"
-      - "traefik.http.routers.prowlarr-rtr.rule=Host(`prowlarr.$DOMAIN_NAME`)"
+      - "traefik.http.routers.prowlarr-rtr.rule=Host(`prowlarr.$TAILSCALE_DOMAIN_NAME`)"
       # Middlewares
       - "traefik.http.routers.prowlarr-rtr.middlewares=chain-no-auth@file"
       # HTTP Services

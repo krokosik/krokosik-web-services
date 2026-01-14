@@ -9,8 +9,8 @@ services:
     profiles: ["media", "starr", "all"]
     networks:
       - traefik_proxy
-    # ports:
-    #   - "$SONARR_PORT:8989"
+    ports:
+      - "$SONARR_PORT:8989"
     volumes:
       - $DOCKERDIR/appdata/sonarr:/config
       - $MEDIA_DIR:/data/media
