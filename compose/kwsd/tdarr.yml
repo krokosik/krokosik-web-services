@@ -10,9 +10,10 @@ services:
     profiles: ["media", "starr", "all"]
     networks:
       - default
+      - traefik_proxy
     ports:
       - $TDARR_WEBUI_PORT:8265 # webUI port
-      - $TDARR_SERVER_PORT:8266 # server port
+      # - $TDARR_SERVER_PORT:8266 # server port
     environment:
       TZ: $TZ
       PUID: $PUID
@@ -28,8 +29,33 @@ services:
     volumes:
       - $DOCKERDIR/appdata/tdarr/server:/app/server
       - $DOCKERDIR/appdata/tdarr/configs:/app/configs
-      - $DOCKERDIR/appdata/tdarr/logs:/app/logs
+      - $DOCKERDIR/logs/$HOSTNAME/tdarr:/app/logs
       - $SHARE_DIR:/data
       - ${TRANSCODE_PATH:-/transcode_cache}:/temp
     devices:
      - /dev/dri:/dev/dri #Required for HW transcoding /share QuickSync
+    labels:
+      - "traefik.enable=true"
+      # HTTP Routers
+      - "traefik.http.routers.tdarr-rtr.entrypoints=websecure"
+      - "traefik.http.routers.tdarr-rtr.rule=Host(`tdarr.$TAILSCALE_DOMAIN_NAME`)"
+      # Middlewares
+      - "traefik.http.routers.tdarr-rtr.middlewares=chain-authentik@file"
+      # HTTP Services
+      - "traefik.http.routers.tdarr-rtr.service=tdarr-svc"
+      - "traefik.http.services.tdarr-svc.loadbalancer.server.port=8265"
+  
+  tdarr-exporter:
+    image: homeylab/tdarr-exporter:latest
+    container_name: tdarr-exporter
+    restart: "unless-stopped"
+    profiles: ["media", "starr", "all"]
+    networks:
+      - default
+    # ports:
+    #   - "$TDARR_EXPORTER_PORT:9090"
+    depends_on:
+      - tdarr
+    environment:
+      TZ: $TZ
+      TDARR_URL: http://tdarr:8266

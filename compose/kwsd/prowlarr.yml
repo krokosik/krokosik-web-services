@@ -26,7 +26,7 @@ services:
       - "traefik.http.routers.prowlarr-rtr.entrypoints=websecure"
       - "traefik.http.routers.prowlarr-rtr.rule=Host(`prowlarr.$TAILSCALE_DOMAIN_NAME`)"
       # Middlewares
-      - "traefik.http.routers.prowlarr-rtr.middlewares=chain-no-auth@file"
+      - "traefik.http.routers.prowlarr-rtr.middlewares=chain-authentik@file"
       # HTTP Services
       - "traefik.http.routers.prowlarr-rtr.service=prowlarr-svc"
       - "traefik.http.services.prowlarr-svc.loadbalancer.server.port=9696"

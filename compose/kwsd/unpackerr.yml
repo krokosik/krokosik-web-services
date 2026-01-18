@@ -3,36 +3,54 @@ services:
   unpackerr:
     image: ghcr.io/hotio/unpackerr:latest
     container_name: unpackerr
-    security_opt:
-      - no-new-privileges:true
-    restart: "no"
+    restart: "unless-stopped"
     profiles: ["media", "starr", "all"]
     networks:
       - default
+    ports:
+      - "$UNPACKERR_PORT:5656" # Webserver port for metrics and healthchecks
     volumes:
       # You need at least this one volume mapped so Unpackerr can find your files to extract.
       # Make sure this matches your Starr apps; the folder mount (/downloads or /data) should be identical.
       - $DOWNLOADS_DIR:/downloads
       - $DOCKERDIR/appdata/unpackerr:/config
+      - $DOCKERDIR/logs/$HOSTNAME/unpackerr:/logs
+      - "/etc/localtime:/etc/localtime:ro"
+    secrets:
+      - sonarr_api_key
+      - radarr_api_key
     # What you see below are defaults for this compose. You only need to modify things specific to your environment.
     # Remove apps and feature configs you do not use or need. 
     # ie. Remove all lines that begin with UN_CMDHOOK, UN_WEBHOOK, UN_FOLDER, UN_WEBSERVER, and other apps you do not use.
     environment:
+      TZ: $TZ
       PUID: $PUID
       PGID: $PGID
+      # General config
+      UN_QUIET: false
+      UN_DEBUG: false
+      UN_ERROR_STDERR: false
+      UN_LOG_QUEUES: 1m
+      UN_LOG_FILES: 10
+      UN_LOG_FILE_MB: 10
+      UN_INTERVAL: 2m
       UN_START_DELAY: 1m
-      UMASK: 002
-      TZ: $TZ
-      #- UN_DEBUG=true
+      UN_RETRY_DELAY: 5m
+      UN_MAX_RETRIES: 3
+      UN_PARALLEL: 1
+      UN_FILE_MODE: 0644
+      UN_DIR_MODE: 0755
+      UN_ACTIVITY: false
       # Sonarr Config
-      UN_SONARR_0_URL: http://sonarr:$SONARR_PORT
-      UN_SONARR_0_API_KEY: ${SONARR_KEY}
-      #- UN_SONARR_0_PATHS_0=/${BASE_PATH}/downloads/shows
+      UN_SONARR_0_URL: http://sonarr:8989
+      UN_SONARR_0_API_KEY: filepath:/run/secrets/sonarr_api_key
       UN_SONARR_0_TIMEOUT: 10s
-      #- UN_SONARR_0_PATHS_0=/${BASE_PATH}/downloads/shows
       # Radarr Config
       UN_RADARR_0_URL: http://radarr:7878
-      UN_RADARR_0_API_KEY: ${RADARR_KEY}
-      #- UN_RADARR_0_PATHS_0=/${BASE_PATH}/downloads/movies
+      UN_RADARR_0_API_KEY: filepath:/run/secrets/radarr_api_key
       UN_RADARR_0_TIMEOUT: 10s
-      #- UN_RADARR_0_PATHS_0=/${BASE_PATH}/downloads/movies
+      # Web Server Config
+      UN_WEBSERVER_METRICS: true
+      UN_WEBSERVER_LISTEN_ADDR: 0.0.0.0:5656
+      UN_WEBSERVER_LOG_FILE: /logs/unpackerr.log
+      UN_WEBSERVER_UPSTREAMS: 192.168.0/24,172.18.0.0/16

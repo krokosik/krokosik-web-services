@@ -27,7 +27,7 @@ services:
       - "traefik.http.routers.radarr-rtr.entrypoints=websecure"
       - "traefik.http.routers.radarr-rtr.rule=Host(`radarr.$TAILSCALE_DOMAIN_NAME`)"
       # Middlewares
-      - "traefik.http.routers.radarr-rtr.middlewares=chain-no-auth@file"
+      - "traefik.http.routers.radarr-rtr.middlewares=chain-authentik@file"
       # HTTP Services
       - "traefik.http.routers.radarr-rtr.service=radarr-svc"
       - "traefik.http.services.radarr-svc.loadbalancer.server.port=7878"

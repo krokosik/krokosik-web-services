@@ -59,6 +59,10 @@ secrets:
     file: $DOCKERDIR/secrets/grafana_oauth_client_secret
   grafana_oauth_client_id:
     file: $DOCKERDIR/secrets/grafana_oauth_client_id
+  sonarr_api_key:
+    file: $DOCKERDIR/secrets/sonarr_api_key
+  radarr_api_key:
+    file: $DOCKERDIR/secrets/radarr_api_key
 
 include:
   ########################### SERVICES
@@ -102,3 +106,5 @@ include:
   - compose/$HOSTNAME/gluetun.yml
   - compose/$HOSTNAME/prowlarr.yml
   - compose/$HOSTNAME/tdarr.yml
+  - compose/$HOSTNAME/unpackerr.yml
+  - compose/$HOSTNAME/cleanuparr.yml

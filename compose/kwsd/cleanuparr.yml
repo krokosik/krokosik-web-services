@@ -1,0 +1,42 @@
+services:
+  # Cleanuparr - Arr Stack Cleanup Tool
+  cleanuparr:
+    image: ghcr.io/cleanuparr/cleanuparr:latest
+    container_name: cleanuparr
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    profiles: ["all", "apps"]
+    networks:
+      - default
+      - traefik_proxy
+    ports:
+      - "$CLEANUPARR_PORT:11011"
+    volumes:
+      - $DOCKERDIR/appdata/cleanuparr:/config
+      - $DOWNLOADS_DIR:/downloads
+    environment:
+      TZ: $TZ
+      PORT: 11011
+      PUID: $PUID
+      PGID: $PGID
+      UMASK: "022"
+    stop_signal: SIGTERM
+    stop_grace_period: 30s
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11011/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 30s
+      retries: 3
+    labels:
+      - "traefik.enable=true"
+      # HTTP Routers
+      - "traefik.http.routers.cleanuparr-rtr.entrypoints=websecure"
+      - "traefik.http.routers.cleanuparr-rtr.rule=Host(`cleanuparr.$TAILSCALE_DOMAIN_NAME`)"
+      # Middlewares
+      - "traefik.http.routers.cleanuparr-rtr.middlewares=chain-authentik@file"
+      # HTTP Services
+      - "traefik.http.routers.cleanuparr-rtr.service=cleanuparr-svc"
+      - "traefik.http.services.cleanuparr-svc.loadbalancer.server.port=11011"
+    # DOCKER-LABELS-PLACEHOLDER
