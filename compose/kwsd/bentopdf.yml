@@ -1,0 +1,28 @@
+services:
+  # BentoPDF - Privacy-first PDF toolkit
+  bentopdf:
+    image: bentopdf/bentopdf-simple:latest
+    container_name: bentopdf
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    profiles: ["apps", "all"]
+    networks:
+      - traefik_proxy
+      - default
+    ports:
+      - "8081:8080"  # Choose unused port (adjust if needed)
+    volumes:
+      - $DOCKERDIR/appdata/bentopdf:/config
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      TZ: $TZ
+      PUID: $PUID
+      PGID: $PGID
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.bentopdf-rtr.entrypoints=websecure"
+      - "traefik.http.routers.bentopdf-rtr.rule=Host(`pdf.$DOMAIN_NAME`)"
+      - "traefik.http.routers.bentopdf-rtr.middlewares=chain-authentik@file"
+      - "traefik.http.routers.bentopdf-rtr.service=bentopdf-svc"
+      - "traefik.http.services.bentopdf-svc.loadbalancer.server.port=8080"

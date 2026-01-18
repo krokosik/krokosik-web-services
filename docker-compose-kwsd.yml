@@ -72,8 +72,9 @@ include:
   - compose/$HOSTNAME/fireflyiii.yml
   - compose/$HOSTNAME/n8n.yml
   - compose/$HOSTNAME/shlink.yml
+  - compose/$HOSTNAME/bentopdf.yml
 
-  ########################### OTEL SERVICES
+   ########################### OTEL SERVICES
   - compose/$HOSTNAME/loki.yml
   - compose/$HOSTNAME/prometheus.yml
   - compose/$HOSTNAME/alloy.yml
