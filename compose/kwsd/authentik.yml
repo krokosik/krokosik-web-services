@@ -62,8 +62,7 @@ services:
     command: server
     user: $PUID:$PGID
     depends_on:
-      postgresql:
-        condition: service_healthy
+      - authentik-worker
     environment:
       TZ: $TZ
       AUTHENTIK_POSTGRESQL__HOST: postgresql
