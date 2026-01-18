@@ -20,7 +20,26 @@ services:
       - $DOCKERDIR/appdata/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
     environment:
       GF_INSTALL_PLUGINS: "grafana-clock-panel,grafana-worldmap-panel,grafana-piechart-panel,yesoreyeram-infinity-datasource"
-      # GF_USERS_ALLOW_SIGN_UP: false
+      GF_USERS_ALLOW_SIGN_UP: false
+      GF_AUTH_GENERIC_OAUTH_ENABLED: "false"
+      GF_AUTH_GENERIC_OAUTH_NAME: "authentik"
+      GF_AUTH_GENERIC_OAUTH_CLIENT_ID__FILE: "/run/secrets/grafana_oauth_client_id"
+      GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET__FILE: "/run/secrets/grafana_oauth_client_secret"
+      GF_AUTH_GENERIC_OAUTH_SCOPES: "openid profile email"
+      GF_AUTH_GENERIC_OAUTH_AUTH_URL: "https://authentik.krokosik.com/application/o/authorize/"
+      GF_AUTH_GENERIC_OAUTH_TOKEN_URL: "https://authentik.krokosik.com/application/o/token/"
+      GF_AUTH_GENERIC_OAUTH_API_URL: "https://authentik.krokosik.com/application/o/userinfo/"
+      GF_AUTH_SIGNOUT_REDIRECT_URL: "https://authentik.krokosik.com/application/o/grafana/end-session/"
+      # Optionally enable auto-login (bypasses Grafana login screen)
+      GF_AUTH_OAUTH_AUTO_LOGIN: "false"
+      # Optionally map user groups to Grafana roles
+      GF_AUTH_GENERIC_OAUTH_ROLE_ATTRIBUTE_PATH: "contains(groups[*], 'admin') && 'Admin' || contains(groups[*], 'Grafana Editors') && 'Editor' || 'Viewer'"
+      # Required if Grafana is running behind a reverse proxy
+      GF_SERVER_ROOT_URL: "https://grafana.krokosik.com"
+    secrets:
+      - grafana_oauth_client_id
+      - grafana_oauth_client_secret
+
     labels:
       - "traefik.enable=true"
       # HTTP Routers

@@ -55,6 +55,10 @@ secrets:
     file: $DOCKERDIR/secrets/n8n_db_password
   n8n_encryption_key:
     file: $DOCKERDIR/secrets/n8n_encryption_key
+  grafana_oauth_client_secret:
+    file: $DOCKERDIR/secrets/grafana_oauth_client_secret
+  grafana_oauth_client_id:
+    file: $DOCKERDIR/secrets/grafana_oauth_client_id
 
 include:
   ########################### SERVICES
