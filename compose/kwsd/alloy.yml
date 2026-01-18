@@ -7,9 +7,12 @@ services:
       - no-new-privileges:true
     restart: unless-stopped
     profiles: ["otel", "all"]
+    ports:
+      - "$ALLOY_PORT:12345"
     networks:
       - default
       - socket_proxy
+      - traefik_proxy
     volumes:
       - $DOCKERDIR/appdata/alloy:/etc/alloy
     command:
@@ -23,3 +26,13 @@ services:
     environment:
       TZ: $TZ
       DOCKER_HOST: $DOCKER_HOST
+    labels:
+      - "traefik.enable=true"
+      # HTTP Routers
+      - "traefik.http.routers.alloy-rtr.entrypoints=websecure"
+      - "traefik.http.routers.alloy-rtr.rule=Host(`alloy.$TAILSCALE_DOMAIN_NAME`)"
+      # Middlewares
+      - "traefik.http.routers.alloy-rtr.middlewares=chain-authentik@file"
+      # HTTP Services
+      - "traefik.http.routers.alloy-rtr.service=alloy-svc"
+      - "traefik.http.services.alloy-svc.loadbalancer.server.port=12345"
