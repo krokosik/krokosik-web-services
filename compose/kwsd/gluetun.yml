@@ -42,7 +42,7 @@ services:
       - "traefik.http.routers.qbit-rtr.entrypoints=websecure"
       - "traefik.http.routers.qbit-rtr.rule=Host(`qbit.$TAILSCALE_DOMAIN_NAME`)"
       # Middlewares
-      - "traefik.http.routers.qbit-rtr.middlewares=chain-no-auth@file"
+      - "traefik.http.routers.qbit-rtr.middlewares=chain-authentik@file"
       # HTTP Services
       - "traefik.http.routers.qbit-rtr.service=qbit-svc"
       - "traefik.http.services.qbit-svc.loadbalancer.server.port=8080"
