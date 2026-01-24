@@ -1,0 +1,34 @@
+services:
+  # ConvertX - Self-hosted file converter
+  convertx:
+    image: ghcr.io/c4illin/convertx
+    container_name: convertx
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    profiles: ["apps", "all"]
+    networks:
+      - traefik_proxy
+      - default
+    volumes:
+      - $DOCKERDIR/appdata/convertx:/app/data
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      TZ: $TZ
+      PUID: $PUID
+      PGID: $PGID
+      ACCOUNT_REGISTRATION: false  # Disable public registration
+      HTTP_ALLOWED: false  # HTTPS only
+      ALLOW_UNAUTHENTICATED: true  # Allow internal use, Authentik handles auth
+      AUTO_DELETE_EVERY_N_HOURS: 24  # Clean up files every 24 hours
+      FFMPEG_ARGS: -hwaccel qsv
+    devices:
+      - /dev/dri:/dev/dri  # Intel QuickSync GPU for FFmpeg hardware acceleration
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.convertx-rtr.entrypoints=websecure"
+      - "traefik.http.routers.convertx-rtr.rule=Host(`convertx.$DOMAIN_NAME`)"
+      - "traefik.http.routers.convertx-rtr.middlewares=chain-authentik@file"
+      - "traefik.http.routers.convertx-rtr.service=convertx-svc"
+      - "traefik.http.services.convertx-svc.loadbalancer.server.port=3000"
+

@@ -87,7 +87,7 @@ include:
   - compose/$HOSTNAME/prometheus.yml
   - compose/$HOSTNAME/alloy.yml
   - compose/$HOSTNAME/grafana.yml
-  
+
   ########################### POSTGRESQL RELATED
   - compose/$HOSTNAME/postgresql.yml
   - compose/$HOSTNAME/authentik.yml
@@ -96,6 +96,7 @@ include:
   ########################### MEDIA SERVICES
   - compose/$HOSTNAME/jellyfin.yml
   - compose/$HOSTNAME/seerr.yml
+  - compose/$HOSTNAME/convertx.yml
 
   ########################### STARR SERVICES
   - compose/$HOSTNAME/sonarr.yml
