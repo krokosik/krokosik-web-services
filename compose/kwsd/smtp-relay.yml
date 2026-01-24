@@ -13,6 +13,7 @@ services:
       - "127.0.0.1:2500:2500"
     environment:
       # Replace these with your actual SMTP provider details
+      TZ: $TZ
       SMTP_HOST: smtp.protonmail.ch
       SMTP_PORT: 587
       SMTP_TLS: "on"
@@ -20,7 +21,6 @@ services:
       SMTP_STARTTLS: "on"
       SMTP_USER: kwsd@krokosik.com
       SMTP_PASSWORD_FILE: /run/secrets/proton_smtp_token 
-      
       # Security: Allow only local connections
       # This allows your host (via 127.0.0.1) and docker networks to connect
       # You might need to adjust the subnet if your host connects via a specific IP
