@@ -63,6 +63,10 @@ secrets:
     file: $DOCKERDIR/secrets/sonarr_api_key
   radarr_api_key:
     file: $DOCKERDIR/secrets/radarr_api_key
+  s3_access_key:
+    file: $DOCKERDIR/secrets/s3_access_key
+  s3_secret_key:
+    file: $DOCKERDIR/secrets/s3_secret_key
 
 include:
   ########################### SERVICES
@@ -76,11 +80,13 @@ include:
   - compose/$HOSTNAME/watchtower.yml
 
   - compose/$HOSTNAME/redis.yml
+  # - compose/$HOSTNAME/s3.yml
   - compose/$HOSTNAME/immich.yml
   - compose/$HOSTNAME/fireflyiii.yml
   - compose/$HOSTNAME/n8n.yml
   - compose/$HOSTNAME/shlink.yml
   - compose/$HOSTNAME/bentopdf.yml
+  - compose/$HOSTNAME/hishtory.yml
 
    ########################### OTEL SERVICES
   - compose/$HOSTNAME/loki.yml

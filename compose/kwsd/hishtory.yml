@@ -1,0 +1,32 @@
+services:
+  hishtory:
+    image: lscr.io/linuxserver/hishtory-server:latest
+    container_name: hishtory
+    profiles: ["apps", "all"]
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      PUID: $PUID
+      PGID: $PGID
+      TZ: $TZ
+      HISHTORY_SQLITE_DB: /config/hishtory.db
+    volumes:
+      - $DOCKERDIR/appdata/hishtory:/config
+    ports:
+      - $HISHTORY_PORT:8080
+    networks:
+      - default
+      - traefik_proxy
+    labels:
+      - "traefik.enable=true"
+      # HTTP Routers
+      - "traefik.http.routers.hishtory-rtr.entrypoints=websecure"
+      - "traefik.http.routers.hishtory-rtr.rule=Host(`hishtory.$TAILSCALE_DOMAIN_NAME`)"
+      # Middlewares
+      - "traefik.http.routers.hishtory-rtr.middlewares=chain-no-auth@file"
+      # HTTP Services
+      - "traefik.http.routers.hishtory-rtr.service=hishtory-svc"
+      - "traefik.http.services.hishtory-svc.loadbalancer.server.port=8080"
+      # Watchtower Label
+      - "com.centurylinklabs.watchtower.enable=false"
