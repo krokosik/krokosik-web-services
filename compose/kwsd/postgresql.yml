@@ -19,6 +19,7 @@ services:
       - "$POSTGRESQL_PORT:5432"
     volumes:
       - $DOCKERDIR/appdata/postgresql:/var/lib/postgresql/data
+      - $DOCKERDIR/scripts/pg-init-cron.sh:/docker-entrypoint-initdb.d/pg-init-cron.sh:ro
     environment:
       TZ: $TZ
       POSTGRES_USER: $POSTGRES_USER
