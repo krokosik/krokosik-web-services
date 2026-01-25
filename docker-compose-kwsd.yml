@@ -18,6 +18,55 @@ networks:
       config:
         - subnet: 192.168.90.0/24
 
+include:
+  ########################### SERVICES
+  # HOSTNAME defined in .env file
+  - compose/$HOSTNAME/socket-proxy.yml
+  - compose/$HOSTNAME/cloudflare-tunnel.yml
+  - compose/$HOSTNAME/cloudflare-bouncer.yml
+  - compose/$HOSTNAME/crowdsec.yml
+  - compose/$HOSTNAME/smtp-relay.yml
+  - compose/$HOSTNAME/traefik.yml
+  - compose/$HOSTNAME/watchtower.yml
+
+  - compose/$HOSTNAME/redis.yml
+  - compose/$HOSTNAME/s3.yml
+  - compose/$HOSTNAME/splitpro.yml
+  - compose/$HOSTNAME/immich.yml
+  - compose/$HOSTNAME/fireflyiii.yml
+  - compose/$HOSTNAME/n8n.yml
+  - compose/$HOSTNAME/shlink.yml
+  - compose/$HOSTNAME/bentopdf.yml
+  - compose/$HOSTNAME/hishtory.yml
+
+   ########################### OTEL SERVICES
+  - compose/$HOSTNAME/loki.yml
+  - compose/$HOSTNAME/prometheus.yml
+  - compose/$HOSTNAME/alloy.yml
+  - compose/$HOSTNAME/grafana.yml
+
+  ########################### POSTGRESQL RELATED
+  - compose/$HOSTNAME/postgresql.yml
+  - compose/$HOSTNAME/authentik.yml
+  # - compose/$HOSTNAME/mariadb.yml
+
+  ########################### MEDIA SERVICES
+  - compose/$HOSTNAME/jellyfin.yml
+  - compose/$HOSTNAME/seerr.yml
+  - compose/$HOSTNAME/convertx.yml
+
+  ########################### STARR SERVICES
+  - compose/$HOSTNAME/sonarr.yml
+  - compose/$HOSTNAME/radarr.yml
+  - compose/$HOSTNAME/bazarr.yml
+  - compose/$HOSTNAME/flaresolverr.yml
+  - compose/$HOSTNAME/qbittorrent.yml
+  - compose/$HOSTNAME/gluetun.yml
+  - compose/$HOSTNAME/prowlarr.yml
+  - compose/$HOSTNAME/tdarr.yml
+  - compose/$HOSTNAME/unpackerr.yml
+  - compose/$HOSTNAME/cleanuparr.yml
+
 secrets:
   wg_private_key:
     file: $DOCKERDIR/secrets/wg_private_key
@@ -63,55 +112,19 @@ secrets:
     file: $DOCKERDIR/secrets/sonarr_api_key
   radarr_api_key:
     file: $DOCKERDIR/secrets/radarr_api_key
+  splitpro_nextauth_secret:
+    file: $DOCKERDIR/secrets/splitpro_nextauth_secret
+  splitpro_database_url:
+    file: $DOCKERDIR/secrets/splitpro_database_url
+  splitpro_authentik_id:
+    file: $DOCKERDIR/secrets/splitpro_authentik_id
+  splitpro_authentik_secret:
+    file: $DOCKERDIR/secrets/splitpro_authentik_secret
+  splitpro_webpush_public_key:
+    file: $DOCKERDIR/secrets/splitpro_webpush_public_key
+  splitpro_webpush_private_key:
+    file: $DOCKERDIR/secrets/splitpro_webpush_private_key
   s3_access_key:
     file: $DOCKERDIR/secrets/s3_access_key
   s3_secret_key:
     file: $DOCKERDIR/secrets/s3_secret_key
-
-include:
-  ########################### SERVICES
-  # HOSTNAME defined in .env file
-  - compose/$HOSTNAME/socket-proxy.yml
-  - compose/$HOSTNAME/cloudflare-tunnel.yml
-  - compose/$HOSTNAME/cloudflare-bouncer.yml
-  - compose/$HOSTNAME/crowdsec.yml
-  - compose/$HOSTNAME/smtp-relay.yml
-  - compose/$HOSTNAME/traefik.yml
-  - compose/$HOSTNAME/watchtower.yml
-
-  - compose/$HOSTNAME/redis.yml
-  # - compose/$HOSTNAME/s3.yml
-  - compose/$HOSTNAME/immich.yml
-  - compose/$HOSTNAME/fireflyiii.yml
-  - compose/$HOSTNAME/n8n.yml
-  - compose/$HOSTNAME/shlink.yml
-  - compose/$HOSTNAME/bentopdf.yml
-  - compose/$HOSTNAME/hishtory.yml
-
-   ########################### OTEL SERVICES
-  - compose/$HOSTNAME/loki.yml
-  - compose/$HOSTNAME/prometheus.yml
-  - compose/$HOSTNAME/alloy.yml
-  - compose/$HOSTNAME/grafana.yml
-
-  ########################### POSTGRESQL RELATED
-  - compose/$HOSTNAME/postgresql.yml
-  - compose/$HOSTNAME/authentik.yml
-  # - compose/$HOSTNAME/mariadb.yml
-
-  ########################### MEDIA SERVICES
-  - compose/$HOSTNAME/jellyfin.yml
-  - compose/$HOSTNAME/seerr.yml
-  - compose/$HOSTNAME/convertx.yml
-
-  ########################### STARR SERVICES
-  - compose/$HOSTNAME/sonarr.yml
-  - compose/$HOSTNAME/radarr.yml
-  - compose/$HOSTNAME/bazarr.yml
-  - compose/$HOSTNAME/flaresolverr.yml
-  - compose/$HOSTNAME/qbittorrent.yml
-  - compose/$HOSTNAME/gluetun.yml
-  - compose/$HOSTNAME/prowlarr.yml
-  - compose/$HOSTNAME/tdarr.yml
-  - compose/$HOSTNAME/unpackerr.yml
-  - compose/$HOSTNAME/cleanuparr.yml

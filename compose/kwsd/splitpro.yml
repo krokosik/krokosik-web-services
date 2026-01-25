@@ -1,0 +1,61 @@
+services:
+  splitpro:
+    image: ossapps/splitpro:$SPLITPRO_VERSION
+    container_name: splitpro
+    profiles: ["apps", "all"]
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - default
+      - traefik_proxy
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    environment:
+      HOSTNAME: 0.0.0.0
+      DEFAULT_HOMEPAGE: /balances
+      NEXTAUTH_URL: https://splitpro.$DOMAIN_NAME
+      NEXTAUTH_SECRET_FILE: /run/secrets/splitpro_nextauth_secret
+      DATABASE_URL_FILE: /run/secrets/splitpro_database_url
+      # Application settings
+      ENABLE_SENDING_INVITES: true
+      CURRENCY_RATE_PROVIDER: nbp
+      # Email settings
+      FROM_EMAIL: kwsd@$DOMAIN_NAME
+      EMAIL_SERVER_HOST: smtp-relay
+      EMAIL_SERVER_PORT: 2500
+      # OAuth settings
+      AUTHENTIK_ID_FILE: /run/secrets/splitpro_authentik_id
+      AUTHENTIK_SECRET_FILE: /run/secrets/splitpro_authentik_secret
+      AUTHENTIK_ISSUER: https://authentik.$DOMAIN_NAME/application/o/splitpro
+      # Web Push settings
+      WEB_PUSH_PUBLIC_KEY_FILE: /run/secrets/splitpro_webpush_public_key
+      WEB_PUSH_PRIVATE_KEY_FILE: /run/secrets/splitpro_webpush_private_key
+      # R2 settings
+      R2_ACCESS_KEY_FILE: /run/secrets/s3_access_key
+      R2_SECRET_KEY_FILE: /run/secrets/s3_secret_key
+      R2_BUCKET: splitpro
+      R2_URL: https://s3.$DOMAIN_NAME
+      R2_PUBLIC_URL: https://s3.$DOMAIN_NAME/splitpro
+    secrets:
+      - splitpro_database_url
+      - splitpro_authentik_secret
+      - splitpro_authentik_id
+      - splitpro_nextauth_secret
+      - splitpro_webpush_public_key
+      - splitpro_webpush_private_key
+      - s3_access_key
+      - s3_secret_key
+    labels:
+      - "traefik.enable=true"
+      # HTTP Routers
+      - "traefik.http.routers.splitpro-rtr.entrypoints=websecure"
+      - "traefik.http.routers.splitpro-rtr.rule=Host(`splitpro.$DOMAIN_NAME`)"
+      # Middlewares
+      - "traefik.http.routers.splitpro-rtr.middlewares=chain-no-auth@file"
+      # HTTP Services
+      - "traefik.http.routers.splitpro-rtr.service=splitpro-svc"
+      - "traefik.http.services.splitpro-svc.loadbalancer.server.port=3000"
+      # Watchtower Label
+      - "com.centurylinklabs.watchtower.enable=false"
