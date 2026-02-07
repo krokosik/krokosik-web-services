@@ -1,5 +1,7 @@
 ########################### NETWORKS
 networks:
+  tunnel:
+    driver: bridge
   default:
     driver: bridge
     ipam:
@@ -30,7 +32,6 @@ include:
   - compose/$HOSTNAME/watchtower.yml
 
   - compose/$HOSTNAME/redis.yml
-  - compose/$HOSTNAME/s3.yml
   - compose/$HOSTNAME/splitpro.yml
   - compose/$HOSTNAME/immich.yml
   - compose/$HOSTNAME/fireflyiii.yml
@@ -124,7 +125,3 @@ secrets:
     file: $DOCKERDIR/secrets/splitpro_webpush_public_key
   splitpro_webpush_private_key:
     file: $DOCKERDIR/secrets/splitpro_webpush_private_key
-  s3_access_key:
-    file: $DOCKERDIR/secrets/s3_access_key
-  s3_secret_key:
-    file: $DOCKERDIR/secrets/s3_secret_key
