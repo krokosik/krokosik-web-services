@@ -38,7 +38,7 @@ services:
       - authentik_postgresql_password
       - authentik_secret_key
     volumes:
-      - $DOCKERDIR/appdata/authentik/media:/media
+      - $DOCKERDIR/appdata/authentik/media:/data/media
       - $DOCKERDIR/appdata/authentik/custom-templates:/templates
       # - $DOCKERDIR/appdata/authentik/geoip/data:/geoip # requires geoipupdate
       # - /var/run/docker.sock:/var/run/docker.sock # Uncomment if NOT using socket-proxy
@@ -86,7 +86,7 @@ services:
       - authentik_postgresql_password
       - authentik_secret_key
     volumes:
-      - $DOCKERDIR/appdata/authentik/media:/media
+      - $DOCKERDIR/appdata/authentik/media:/data/media
       - $DOCKERDIR/appdata/authentik/custom-templates:/templates
       # - $DOCKERDIR/appdata/authentik/geoip/data:/geoip # requires geoipupdate
     labels:
