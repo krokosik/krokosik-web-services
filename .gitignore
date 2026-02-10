@@ -2,6 +2,12 @@
 **/library
 logs/
 secrets/
-appdata/
+
+appdata/*
+!appdata/alloy/
+!appdata/traefik/
+appdata/traefik/acme
+appdata/traefik/plugins
+
 opencode.jsonc
 node_modules/

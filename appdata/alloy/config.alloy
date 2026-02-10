@@ -1,0 +1,121 @@
+discovery.docker "linux" {
+  host = "tcp://socket-proxy:2375"
+}
+
+discovery.relabel "logs_integrations_docker" {
+  targets = []
+
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex = "^/?(.*)$"
+    target_label = "service_name"
+  }
+}
+
+loki.source.docker "docker_logs" {
+  host          = "tcp://socket-proxy:2375"
+  targets       = discovery.docker.linux.targets
+  labels        = {"platform" = "docker"}
+  relabel_rules = discovery.relabel.logs_integrations_docker.rules
+  forward_to    = [loki.write.loki.receiver]
+}
+
+loki.write "loki" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+
+    batch_size = "128KiB"  // Default is 1MiB
+    batch_wait = "500ms"   // Default is 1s
+  }
+}
+
+prometheus.exporter.cadvisor "docker_metrics" {
+  docker_host       = "tcp://socket-proxy:2375"
+  storage_duration  = "5m"
+}
+
+prometheus.scrape "scraper" {
+  targets         = prometheus.exporter.cadvisor.docker_metrics.targets
+  forward_to      = [prometheus.remote_write.prometheus.receiver]
+  scrape_interval = "10s"
+}
+
+prometheus.scrape "unpackerr" {
+  // Equivalent to static_configs: - targets: ['unpackerr:5656']
+  targets = [{
+    __address__ = "unpackerr:5656",
+  }]
+
+  // Equivalent to job_name: 'unpackerr'
+  job_name        = "unpackerr"
+  
+  // Equivalent to scrape_interval: 1m
+  scrape_interval = "1m"
+
+  // Send the metrics to your existing Prometheus writer
+  forward_to      = [prometheus.remote_write.prometheus.receiver]
+}
+
+prometheus.scrape "tdarr" {
+  targets = [{
+    __address__ = "tdarr-exporter:9090",
+  }]
+  job_name        = "tdarr"
+  scrape_interval = "1m"
+  metrics_path   = "/metrics"
+  forward_to      = [prometheus.remote_write.prometheus.receiver]
+}
+
+prometheus.remote_write "prometheus" {
+  endpoint {
+    url = "http://prometheus:9090/api/v1/write"
+  }
+}
+
+prometheus.scrape "crowdsec_scraper" {
+  targets = [{
+    __address__ = "crowdsec:6060", // Ensure CrowdSec exposes port 6060
+  }]
+  forward_to = [prometheus.remote_write.prometheus.receiver]
+}
+
+/////////////////////////////////////
+///////////////////////////////////// BLACKBOX
+/////////////////////////////////////
+
+// This loads your module definitions
+prometheus.exporter.blackbox "uptime" {
+  config_file = "/etc/alloy/blackbox.yml"
+  
+  // Define what to probe here
+  targets = [
+    { name = "Jellyfin", address = "http://jellyfin:8096",                           module = "http_2xx" },
+    { name = "Immich",   address = "http://immich:2283/api/server/ping",        module = "http_2xx" },
+    { name = "Authentik", address = "http://authentik:9000/-/health/live/",          module = "http_2xx" },
+    { name = "Authentik DB", address = "http://authentik:9000/-/health/ready/",      module = "http_2xx" },
+    { name = "Authentik Outpost", address = "http://authentik:9000/outpost.goauthentik.io/ping",      module = "http_2xx" },
+    { name = "Sonarr",    address = "http://sonarr:8989/ping",                             module = "http_2xx" },
+    { name = "Radarr",    address = "http://radarr:7878/ping",                             module = "http_2xx" },
+    { name = "Traefik",   address = "http://traefik:8080/ping",                     module = "http_2xx" },
+    { name = "Cleanuparr", address = "http://cleanuparr:11011/health",               module = "http_2xx" },
+    // Example of a Ping test
+    { name = "Gateway",  address = "192.168.0.1",                                    module = "icmp_ping" },
+  ]
+}
+
+// This tells Alloy to actually run the probes defined above
+prometheus.scrape "uptime_scraper" {
+  // Magic: Pull the targets list from the block above
+  targets    = prometheus.exporter.blackbox.uptime.targets
+  forward_to = [prometheus.remote_write.prometheus.receiver]
+  
+  // How often to check?
+  scrape_interval = "30s"
+  
+  // This is purely for the internal metrics of the exporter itself
+  // (Not the probe results, but "is the blackbox exporter running?")
+  job_name   = "blackbox" 
+}
+
+// Enable live debugging features (empty config means use defaults)
+livedebugging{}

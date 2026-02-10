@@ -1,0 +1,10 @@
+http:
+  middlewares:
+    chain-authentik:
+      chain:
+        middlewares:
+          - middlewares-crowdsec-bouncer
+          - middlewares-geoblock
+          - middlewares-rate-limit
+          - middlewares-secure-headers
+          - middlewares-authentik
